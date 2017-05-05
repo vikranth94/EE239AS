@@ -1,15 +1,15 @@
 % EE239.2 HW 3
 
-%% Problem 4
+%% Problem 4: Real Neural Data
 
 clc
 clear 
 close all
-%% Part a)
+%% Part A: Spike Trains
 
 ps3_data = importdata('ps3_data.mat');
 T_cell = {};
-
+numTrials = 128;
 spike_loc = {};
 max_trains = zeros(8,5);
 max_spikes = zeros(8,5);
@@ -32,21 +32,18 @@ for i = 1:size(ps3_data,2)
     [B,I] = sort(spike_sum(i,:),'descend');
     max_trains(i,:) = I(1:5);
     max_spikes(i,:) = B(1:5);
-
+    % plotted five highest spike count trains for visualization
+    
     for j = 1:size(max_trains,2)
         T_cell_plot{i,j} = T_cell{i,max_trains(i,j)};
     end
 
 end
 
-% T_mat_plot = T_mat{1,:};
-
-% for i = 1:5
-
 figure(1)
 subplotRaster(T_cell_plot)
 
-%% Part b)
+%% Part B: Spike Histogram
 
 bins = 0:0.020:1;
 
@@ -63,64 +60,52 @@ end
 figure(2)
 counts_sum = counts_sum(:,1:50);
 counts_avg = counts_sum/100;
-bar(bins(1:end-1)*1000,counts_avg(1,:),'histc')
-xlabel('Time in ms');
-ylabel('Firing Rate');
+subplotCounts(counts_avg,bins)
 
-%counts = histc(T_cell{1,1}, bins);
-% for j = size(T_cell,1)
-%     for k = size(T_cell,2)
-%         for i = 1:length(bins)-1
-%             numSpikes = length(find(T_cell{j,k} > bins(i) & T_cell{j,k} < bins(i+1)));
-%         end
-%     end
-% end
+%% Part C: Tuning Curve
 
-%% Part c
+s = [30 70 110 150 190 230 310 350];
 
-f_rate = zeros(1,800);
-rate = zeros(8,100);
-for i=1:8
-    for j=1:100
-       % f_rate((i-1)*100+j) = length(T_cell{i,j});
+f_rate = zeros(1,length(s)*numTrials);
+rate = zeros(length(s),numTrials);
+
+f_rate = zeros(1,length(s)*numTrials);
+rate = zeros(length(s),numTrials);
+for i=1:length(s)
+    for j=1:numTrials
        rate(i,j) = length(T_cell{i,j});
     end
 end
 
-f_rate = reshape(rate',[1,800]);
+f_rate = reshape(rate',[1,length(s)*numTrials]);
 
-s_rep = repmat(s,100,1);
+s_rep = repmat(s,numTrials,1);
 s_rep = reshape(s_rep, 1, numel(s_rep));
 
+figure(3)
+title('Part C: Tuning Curve')
 scatter(s_rep,f_rate,'x');
-f_rate_mean = sum(rate,2)/100;
+f_rate_mean = sum(rate,2)/numTrials;
 hold on;
 scatter(s,f_rate_mean,'x')
-hold on
-plot(s,lambda)
+% plot(s,lambda,'g')
+xlabel('Angle')
+ylabel('Firing Rate')
+hold off
 
-%% Part d)
+%% Part D: Count Distribution
 
-counts_dist = [];
+figure(4)
+subplotHist(rate, lambda)       % account for 50 bins
 
-for i = 1:size(counts_avg,1)
-    counts_dist(i,:) = hist(counts_avg(i,:))/length(counts_avg);
-end
-
-figure(3)
-
-subplotHist(counts_dist, 0.02*lambda)       % account for 50 bins
-
-% exp(-lambda)*(lambda.^x)/fact(x)
-
-%% Part e)
+%% Part E: Fano Factor
 
 counts_mean = mean(rate,2);
 counts_var = var(rate,1,2);
 figure(4)
 scatter(counts_var, counts_mean)
 
-%% Part f)
+%% Part F: ISI Distribution
 
 ISI = cell(8,1);
 ISI_dist = cell(8,1);
