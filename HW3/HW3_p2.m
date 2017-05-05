@@ -5,7 +5,7 @@
 clc
 clear 
 close all
-%% Part a)
+%Part a)
 
 s = [0 45 90 135 180 225 270 315];
 
@@ -27,8 +27,11 @@ T_cell = {};        % matrix of 100 spike trains trials per lambda
 
 for i = 1:length(mu)
     for k = 1:numTrials
+        n = 0;
+        T = 0;
+        T_vec = [];
 
-      while ( T < time )
+      while ( T < 1 )
         dt = exprnd(mu(i));
         n = n + 1;
         T = T + dt;
@@ -38,8 +41,8 @@ for i = 1:length(mu)
         % delete last value because it will go over the set time 
         
         T_cell{i,k} = T_vec;
-        n = 0;       % reset n and t for each trial
-        T = 0;
+%         n = 0;       % reset n and t for each trial
+%         T = 0;
     end 
 end
 
