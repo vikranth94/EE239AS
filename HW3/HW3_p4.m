@@ -132,8 +132,8 @@ for i = 1:length(mu)
     for k = 1:numTrials
         ISI{i} = [ISI{i}, diff(T_cell{i,k})];
     end
-    ISI_hist = histogram(ISI{i},bins,'Normalization','pdf');
-    ISI_dist{i} = ISI_hist.Values;
+    ISI_hist = histcounts(ISI{i},bins,'Normalization','pdf');
+    ISI_dist{i} = ISI_hist;
     % normalize by dividing by sum (to get pdf) and multiply by 100 (100
     % trials)
 end
