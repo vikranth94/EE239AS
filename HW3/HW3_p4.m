@@ -65,7 +65,7 @@ subplotCounts(counts_avg,bins)
 %% Part C: Tuning Curve
 
 s = [30 70 110 150 190 230 310 350];
-
+t_plot = 0:360;
 f_rate = zeros(1,length(s)*numTrials);
 rate = zeros(length(s),numTrials);
 
@@ -81,54 +81,64 @@ f_rate = reshape(rate',[1,length(s)*numTrials]);
 
 s_rep = repmat(s,numTrials,1);
 s_rep = reshape(s_rep, 1, numel(s_rep));
+f_rate_mean = sum(rate,2)/numTrials;
+
+F = @(x,xdata)x(1) + x(2)*cosd(xdata - x(3));
+x0 = [1 1 100];
+[x,resnorm,~,exitflag,output] = lsqcurvefit(F,x0,s,f_rate_mean');
+
+r_0 = x(1);
+r_max = x(2)+x(1);
+s_max = x(3);
 
 figure(3)
-title('Part C: Tuning Curve')
 scatter(s_rep,f_rate,'x');
 f_rate_mean = sum(rate,2)/numTrials;
 hold on;
 scatter(s,f_rate_mean,'x')
-% plot(s,lambda,'g')
-xlabel('Angle')
-ylabel('Firing Rate')
+plot(t_plot,F(x,t_plot),'g')
+legend('Data Points','Mean Firing Rate','Tuning Curve')
+xlabel('Angle (Degrees)')
+ylabel('Firing Rate (Hz)')
+title('Part C: Tuning Curve')
 hold off
 
 %% Part D: Count Distribution
 
+lambda = r_0 + (r_max-r_0) * cosd(s - s_max);
 figure(4)
-subplotHist(rate, lambda)       % account for 50 bins
+subplotHist(rate, lambda)       
 
 %% Part E: Fano Factor
 
 counts_mean = mean(rate,2);
 counts_var = var(rate,1,2);
-figure(4)
+figure(5)
+hold on
 scatter(counts_var, counts_mean)
+plot(1:max(counts_mean),1:max(counts_mean))
+title('Part E: Fano Factor')
+xlabel('Spike Count Mean')
+ylabel('Spike Count Variance')
+hold off
 
 %% Part F: ISI Distribution
 
 ISI = cell(8,1);
 ISI_dist = cell(8,1);
+mu = 1./lambda;
 
 for i = 1:length(mu)
     for k = 1:numTrials
         ISI{i} = [ISI{i}, diff(T_cell{i,k})];
     end
-    ISI_dist{i} = 100*histc(ISI{i},bins)/sum(histc(ISI{i},bins));
+    ISI_hist = histogram(ISI{i},bins,'Normalization','pdf');
+    ISI_dist{i} = ISI_hist.Values;
     % normalize by dividing by sum (to get pdf) and multiply by 100 (100
     % trials)
 end
 
 figure(5)
-subplotISI(ISI_dist,bins,mu)
+subplotISI(ISI_dist,bins(1:end-1),mu)
 
-%% Part g)
-
-for i = 1:length(mu)
-    ISI_mean(i) = mean(ISI{i});
-    ISI_CV(i) = std(ISI{i})/mean(ISI{i});
-end
-
-scatter(ISI_mean,ISI_CV)
-ylabel('ISI CV')
-xlabel('ISI Mean')
+% ask about: 

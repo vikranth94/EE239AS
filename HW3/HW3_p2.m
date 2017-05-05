@@ -5,11 +5,8 @@
 clc
 clear 
 close all
-<<<<<<< HEAD
-%Part a)
-=======
+
 %% Part A: Spike Trains
->>>>>>> 174be80f5e0002af85287f39e46aeed94b61a7ec
 
 s = [0 45 90 135 180 225 270 315];
 
@@ -47,14 +44,7 @@ for i = 1:length(mu)
         % delete last value because it will go over the set time 
         
         T_cell{i,k} = T_vec;
-<<<<<<< HEAD
-%         n = 0;       % reset n and t for each trial
-%         T = 0;
-=======
-        n = 0;       % reset n and t for each trial
-        T = 0;
-        T_vec = [];
->>>>>>> 174be80f5e0002af85287f39e46aeed94b61a7ec
+
     end 
 end
 
@@ -96,12 +86,14 @@ s_rep = reshape(s_rep, 1, numel(s_rep));
 figure(3)
 title('Part C: Tuning Curve')
 scatter(s_rep,f_rate,'x');
-f_rate_mean = sum(rate,2)/100;
+f_rate_mean = sum(rate,2)/numTrials;
 hold on;
 scatter(s,f_rate_mean,'x')
 plot(s,lambda,'g')
 xlabel('Angle')
 ylabel('Firing Rate')
+legend('Data Points','Mean Firing Rate','Tuning Curve')
+
 hold off
 
 %% Part D: Count Distribution
@@ -114,10 +106,13 @@ subplotHist(rate, lambda)       % account for 50 bins
 counts_mean = mean(rate,2);
 counts_var = var(rate,1,2);
 figure(5)
+hold on
 scatter(counts_var, counts_mean)
+plot(1:max(counts_mean),1:max(counts_mean))
 title('Part E: Fano Factor')
 xlabel('Spike Count Mean')
 ylabel('Spike Count Variance')
+hold off
 
 %% Part F: ISI Distribution
 
