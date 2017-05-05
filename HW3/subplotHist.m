@@ -4,7 +4,7 @@ x = 0:10;           % 50 bins
 
 subplot(5,3,9)
 hold on
-bar(bar_func(1,:))
+histogram(bar_func(1,:),'Normalization','pdf')
 plot(x, poisspdf(x,lambda(1)))
 
 subplot(5,3,6)
