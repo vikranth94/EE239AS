@@ -89,7 +89,9 @@ scatter(s_rep,f_rate,'x');
 f_rate_mean = sum(rate,2)/numTrials;
 hold on;
 scatter(s,f_rate_mean,'x')
-plot(s,lambda,'g')
+s_2 = 0:360;
+lambda_2 = r_0 + (r_max - r_0) * cosd(s_2 - s_max);
+plot(s_2,lambda_2,'g')
 xlabel('Angle')
 ylabel('Firing Rate')
 legend('Data Points','Mean Firing Rate','Tuning Curve')
