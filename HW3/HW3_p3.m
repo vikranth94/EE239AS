@@ -108,8 +108,8 @@ for k = 1:numTrials
     ISI = [ISI, diff(T_cell{k})];
 end
 
-ISI_hist = histogram(ISI{1},bins,'Normalization','pdf');
-ISI_dist = ISI_hist.Values;
+ISI_hist = histcounts(ISI{1},bins,'Normalization','pdf');
+ISI_dist = ISI_hist;
 % normalize by dividing by sum (to get pdf) and multiply by 100 (100
 % trials)
 
