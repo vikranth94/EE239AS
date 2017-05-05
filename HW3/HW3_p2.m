@@ -107,7 +107,7 @@ counts_mean = mean(rate,2);
 counts_var = var(rate,1,2);
 figure(5)
 hold on
-scatter(counts_var, counts_mean)
+scatter(counts_mean, counts_var)
 plot(1:max(counts_mean),1:max(counts_mean))
 title('Part E: Fano Factor')
 xlabel('Spike Count Mean')
