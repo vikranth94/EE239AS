@@ -24,10 +24,6 @@ for i = 1:size(ps3_data,2)
         
         spike_sum(i,k) = sum(spike_cell{i,k});
         
-%         if (spike_sum(i,k) >= 5)
-%             spike_loc{i} = [i, k];
-%         end
-        
     end
     [B,I] = sort(spike_sum(i,:),'descend');
     max_trains(i,:) = I(1:5);
@@ -47,19 +43,18 @@ subplotRaster(T_cell_plot)
 
 bins = 0:0.020:1;
 
-% h=histogram(T_cell{1,1}, bins)
-% counts = h.Values
 counts_sum = zeros(8,length(bins));
 for i=1:100
     for j=1:8
         counts = histc(T_cell{j,i}, bins);
         counts_sum(j,:) = counts_sum(j,:) + counts;
+        % count the number of spikes per bin
     end
 end
 
 figure(2)
 counts_sum = counts_sum(:,1:50);
-counts_avg = counts_sum/100;
+counts_avg = counts_sum/100;            % average across 100 trials
 subplotCounts(counts_avg,bins)
 
 %% Part C: Tuning Curve
@@ -82,14 +77,18 @@ f_rate = reshape(rate',[1,length(s)*numTrials]);
 s_rep = repmat(s,numTrials,1);
 s_rep = reshape(s_rep, 1, numel(s_rep));
 f_rate_mean = sum(rate,2)/numTrials;
+% calculate the mean firing rate from the data and averave over the number
+% of trials
 
 F = @(x,xdata)x(1) + x(2)*cosd(xdata - x(3));
 x0 = [1 1 100];
 [x,resnorm,~,exitflag,output] = lsqcurvefit(F,x0,s,f_rate_mean');
+% find the parameters of Equation 1 using least squares
 
 r_0 = x(1);
 r_max = x(2)+x(1);
 s_max = x(3);
+% parameters for tuning curve
 
 figure(3)
 scatter(s_rep,f_rate,'x');
@@ -109,8 +108,10 @@ lambda = r_0 + (r_max-r_0) * cosd(s - s_max);
 figure(4)
 subplotHist(rate, lambda)    
 
-% The empirical distributions differ from the idealized Poisson
-% distributions because of the refractory periods of the Action Potentials
+% The empirical distributions differ from the idealized Poisson distributions 
+% because of the refractory periods and inhomogeity of the Poisson process.
+% The exponential distribution used to generate the ISIs does not account
+% for the refractory period. 
 
 %% Part E: Fano Factor
 
@@ -125,8 +126,10 @@ xlabel('Spike Count Mean')
 ylabel('Spike Count Variance')
 hold off
 
-% The points don't lie on the 45 degree line because this emprical
-% distribution is not an ideal poisson distribution
+% The points do not lie on the 45 degree line because as firing rate
+% increases, the ISI distribution tends towards a Gamma distribution, and
+% so the process overall becomes sub-Poisson. We can see this in the plot,
+% as the data points drop below the 45 degree line.
 
 %% Part F: ISI Distribution
 
@@ -145,6 +148,8 @@ end
 figure(6)
 subplotISI(ISI_dist,bins(1:end-1),mu)
 
-% The empirical distributions of ISI-s differ from the idealized
-% Exponential distributions because of the refractory periods of the 
-% Action Potentials and also because the firing rate varies with time
+% The empirical distributions of ISIs differ from the idealized
+% exponential distributions because of refractory periods, as well as the
+% fact that the firing rate varies with time and is therefore not a
+% homogeneous Poisson process, which is what ideal exponential
+% distributions generate.

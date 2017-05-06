@@ -29,13 +29,16 @@ for k = 1:numTrials
         
         T = T + dt;
 
-        u = rand(1);                % sample from uniform distribution
+        u = rand(1);                % sample from uniform distribution to 
+                                    % see which ISI values to throw out
         s_Tn = (T^2)*180;
         lambda_Tn = r_0 + (r_max - r_0) * cosd(s_Tn - s_max);
-        % calculate threshold value
+        % calculate instantaneous rate, to compare against maximum rate for
+        % deleting values
+        
         if (lambda_Tn/lambda_max) >= u
             n = n + 1;
-            T_vec(n) = T;
+            T_vec(n) = T;           % only keep values that satisfy the threshold
         end
         
     end
@@ -45,7 +48,7 @@ for k = 1:numTrials
     % delete last value because it will go over the set time
     
     T_cell{1,k} = T_vec;
-    n = 0;       % reset n and t
+    n = 0;       % reset n, t, and T_vec for each trial
     T = 0;
     T_vec = [];
 
@@ -78,7 +81,10 @@ plot(bins, 0.02*lambda_exp)
 title('Spike Histogram')
 hold off
 
-% The spike histogram agrees with the expected Firing Rate Profile
+% The spike histogram agrees with the expected firing rate profile, as can
+% be seen from the plot. The expected firing rate is a function of time,
+% and the way we generated the ISIs was also dependent on the instantaneous
+% lambda value.
 
 %% Part C: Count Distribution
 
@@ -101,8 +107,10 @@ xlabel('Number of Spikes')
 ylabel('Probability')
 hold off
 
-% The spike counts are poisson distributed having a rate lambda_eff
-% obtained by integrating lamda from 0 to 1
+% The Poisson pdf plotted uses the effective firing rate, which was obtained 
+% by integrating the firing rate profile from 0 to 1, for the comparison 
+% against the spike counts. The spike counts are Poisson distributed and
+% well fitted by this pdf.
 
 %% Part D: ISI Distribution
 
@@ -122,5 +130,7 @@ plot(bins, exppdf(bins,1/lambda_eff),'r')
 xlim([0 1])
 title('ISI Distribution')
 
-% No, the ISI's of Inhomogeneous Poisson process are not exponentially
-% distributed
+% No, the ISIs of Inhomogeneous Poisson process are not exponentially
+% distributed. We would not expect it to be, since we sampled from the
+% exponential distribution but then also used a threshold to throw away
+% certain values using a uniform distributed random variable.
