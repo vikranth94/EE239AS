@@ -7,9 +7,6 @@ close all
 %% Problem 3: Inhomogeneous Poisson Process
 %% Part A: Spike Trains
 
-% t = linspace(0,1,8);
-% s = (t.^2)*180;
-
 r_0 = 35;
 r_max = 60;
 s_max = 90;
@@ -59,6 +56,7 @@ plotRaster(T_cell(1:5))
 title('Generated Inhomogeneous Spike Train')
 xlabel('Spike Time')
 ylabel('Spikes')
+
 %% Part B: Spike Histogram
 
 bins = 0:0.020:1;
@@ -77,7 +75,10 @@ lambda_exp = r_0 + (r_max - r_0) * cosd(180*(bins).^2 - s_max);
 hold on
 bar(bins(1:end-1),counts_avg,'histc')
 plot(bins, 0.02*lambda_exp)
+title('Spike Histogram')
 hold off
+
+% The spike histogram agrees with the expected Firing Rate Profile
 
 %% Part C: Count Distribution
 
@@ -100,6 +101,9 @@ xlabel('Number of Spikes')
 ylabel('Probability')
 hold off
 
+% The spike counts are poisson distributed having a rate lambda_eff
+% obtained by integrating lamda from 0 to 1
+
 %% Part D: ISI Distribution
 
 ISI = {};
@@ -110,11 +114,13 @@ end
 
 ISI_hist = histcounts(ISI{1},bins,'Normalization','pdf');
 ISI_dist = ISI_hist;
-% normalize by dividing by sum (to get pdf) and multiply by 100 (100
-% trials)
 
 figure(6)
 hold on
 bar(bins(1:end-1),ISI_dist,'histc')
 plot(bins, exppdf(bins,1/lambda_eff),'r')
 xlim([0 1])
+title('ISI Distribution')
+
+% No, the ISI's of Inhomogeneous Poisson process are not exponentially
+% distributed

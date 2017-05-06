@@ -109,8 +109,7 @@ lambda = r_0 + (r_max-r_0) * cosd(s - s_max);
 figure(4)
 subplotHist(rate, lambda)    
 
-% The empirical distributions differ from the idealized Poisson
-% distributions because of the refractory periods of the Action Potentials
+% 
 
 %% Part E: Fano Factor
 
@@ -125,9 +124,6 @@ xlabel('Spike Count Mean')
 ylabel('Spike Count Variance')
 hold off
 
-% The points don't lie on the 45 degree line because this emprical
-% distribution is not an ideal poisson distribution
-
 %% Part F: ISI Distribution
 
 ISI = cell(8,1);
@@ -140,11 +136,11 @@ for i = 1:length(mu)
     end
     ISI_hist = histcounts(ISI{i},bins,'Normalization','pdf');
     ISI_dist{i} = ISI_hist;
+    % normalize by dividing by sum (to get pdf) and multiply by 100 (100
+    % trials)
 end
 
-figure(6)
+figure(5)
 subplotISI(ISI_dist,bins(1:end-1),mu)
 
-% The empirical distributions of ISI-s differ from the idealized
-% Exponential distributions because of the refractory periods of the 
-% Action Potentials and also because the firing rate varies with time
+% ask about: 

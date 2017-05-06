@@ -95,13 +95,17 @@ plot(s_2,lambda_2,'g')
 xlabel('Angle')
 ylabel('Firing Rate')
 legend('Data Points','Mean Firing Rate','Tuning Curve')
-
 hold off
+
+% From the plot we can observe that the mean firing rate lies near the
+% tuning curve
 
 %% Part D: Count Distribution
 
 figure(4)
 subplotHist(rate, lambda)       % account for 50 bins
+
+% The empirical distributions well fit by the Poisson Distribution
 
 %% Part E: Fano Factor
 
@@ -115,6 +119,9 @@ title('Part E: Fano Factor')
 xlabel('Spike Count Mean')
 ylabel('Spike Count Variance')
 hold off
+
+% These points lie near the 45 deg diagonal, as would be expected 
+% of a Poisson distribution
 
 %% Part F: ISI Distribution
 
@@ -134,6 +141,8 @@ end
 figure(6)
 subplotISI(ISI_dist,bins(1:end-1),mu)
 
+% The empirical distributions well fit by exponential distributions
+
 %% Part G: Coefficient of Variation
 
 for i = 1:length(mu)
@@ -147,3 +156,5 @@ ylim([0,2])
 title('Part G: Coefficient of Variation (CV) vs. Mean')
 ylabel('ISI CV')
 xlabel('ISI Mean')
+
+% The CV values lie near unity, as would be expected of a Poisson process
