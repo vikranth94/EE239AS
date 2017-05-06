@@ -97,7 +97,7 @@ ylabel('Firing Rate')
 legend('Data Points','Mean Firing Rate','Tuning Curve')
 hold off
 
-% From the plot we can observe that the mean firing rate lies near the
+% From the plot we can observe that the mean firing rates lie near the
 % tuning curve
 
 %% Part D: Count Distribution
@@ -105,7 +105,7 @@ hold off
 figure(4)
 subplotHist(rate, lambda)       % account for 50 bins
 
-% The empirical distributions well fit by the Poisson Distribution
+% The empirical distributions are well fit by the Poisson Distribution
 
 %% Part E: Fano Factor
 
@@ -134,14 +134,12 @@ for i = 1:length(mu)
     end
     ISI_hist = histcounts(ISI{i},bins,'Normalization','pdf');
     ISI_dist{i} = ISI_hist;
-    % normalize by dividing by sum (to get pdf) and multiply by 100 (100
-    % trials)
 end
 
 figure(6)
 subplotISI(ISI_dist,bins(1:end-1),mu)
 
-% The empirical distributions well fit by exponential distributions
+% The empirical ISI distributions are well fit by exponential distributions
 
 %% Part G: Coefficient of Variation
 
