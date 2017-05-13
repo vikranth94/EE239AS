@@ -10,7 +10,6 @@ ps3_data = importdata('ps4_simdata.mat');
 
 %% Part A: 2D Plot
 
-D = 2;          % number of neurons
 n_class = size(ps3_data,2);
 n_trial = size(ps3_data,1);
 data = cell(1, n_class);
@@ -34,7 +33,19 @@ axis([0 20 0 20])
 %% Part B: ML Parameters
 
 % Model (i) Gaussian, Shared Covariance
+N_k = D_trial*n_trial;
+P_Ck = N_k/(n_class*N_k);
+
+for i = 1:n_class
+    mu_i(i) = 1/(N_k)*sum(data{1,i},2);
+end
+
+display(mu_i)
+
+S_k = 1/N_k * 
+sigma = 
+
+
+
 % Model (ii) Gaussian, Class Specific Covariance
 % Model (iii) Poisson
-
-
