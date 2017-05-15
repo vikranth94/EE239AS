@@ -49,11 +49,31 @@ for i = 1:n_class
         cov_trial_i = cov_trial_i + (n_spikes_train{1,i}(:,j)-mu_i(:,i))*(n_spikes_train{1,i}(:,j)-mu_i(:,i))';
         % sum the (x-mu)*(x-mu)' matrices for each trial 
     end
-    S_k_i{i} = 1/N_k * cov_trial_i/n_trial;
+    S_k_i{i} = 1/N_k * cov_trial_i;
     % calculate the S_k for each class and store into cell
     sigma_i = sigma_i + N_k/N * S_k_i{i};
     % calculate sigma (weighted sum of S_k)
 end
+
+%% Part A: Means, CovarianceEllipses and Decision Boundaries
+%Model 1
+% x = 0:0.1:20;
+% y = 0:0.1:20;
+% [X Y] = meshgrid(x,y);
+for n = 1:n_class
+xy = n_spikes_test{n}';
+l = size(xy,1);
+% img_size = size(X);
+for j = 1:l
+for i = 1:n_class
+    k(j,i) = log(P_Ck)+ mu_i(:,i)'*inv(sigma_i)*xy(j,:)'-0.5*mu_i(:,i)'*inv(sigma_i)*mu_i(:,i);
+end
+end
+[m,idx] = max(k, [], 2);
+errors(n)= length(idx(idx~=n));
+end
+accuracy = sum(errors)/(D_trial*n_class);
+% reshape the idx (which contains the class label) into an image.
 
 %% Part B: Model (ii) Gaussian, Class Specific Covariance
 
@@ -75,12 +95,13 @@ end
 thres = 10;
 % find the neurons which do not spike at least 10 times in each class, and
 % find the unique rows
-[row,col] = find(n_spikes_total<10);
+[row,col] = find(n_spikes_total<thres);
 row_del = unique(row);
 
 % create a second spike train matrix to store the neurons above the
 % threshold
 n_spikes_train_ii = n_spikes_train;
+n_spikes_test_ii = n_spikes_test;
 
 n_spikes_trial_ii = {};
 n_spikes_total_ii = [];
@@ -88,99 +109,52 @@ n_spikes_total_ii = [];
 for i = 1:n_class
     % remove the below-threshold neurons across all classes
     n_spikes_train_ii{1,i}(row_del,:) = [];
+    n_spikes_test_ii{1,i}(row_del,:) = [];
+
     % check that removing these neurons worked
     n_spikes_trial_ii{1,i} = sum(n_spikes_train_ii{1,i},2);
     n_spikes_total_ii = [n_spikes_total_ii, n_spikes_trial_ii{1,i}];
 end
 
-%% Part E: Means, CovarianceEllipses and Decision Boundaries
 %Model 1
-x = 0:0.1:20;
-y = 0:0.1:20;
-[X Y] = meshgrid(x,y);
-xy = [X(:) Y(:)];
-l = length(xy);
-img_size = size(X);
-for j = 1:l
+% x = 0:0.1:20;
+% y = 0:0.1:20;
+% [X Y] = meshgrid(x,y);
+D_trial_ii = size(n_spikes_train_ii{1},1);
+
+mu_ii = zeros(D_trial_ii, n_class);
+S_k_ii = cell(1, n_class);
+sigma_ii = zeros(D_trial_ii, D_trial_ii);
+
 for i = 1:n_class
-    k(j,i) = log(P_Ck)+ mu_i(:,i)'*inv(sigma_i)*xy(j,:)'-0.5*mu_i(:,i)'*inv(sigma_i)*mu_i(:,i);
+    mu_ii(:,i) = 1/(N_k)*sum(n_spikes_train_ii{1,i},2);
+    cov_trial_ii = zeros(D_trial_ii, D_trial_ii);
+    for j = 1:n_trial
+        cov_trial_ii = cov_trial_ii + (n_spikes_train_ii{1,i}(:,j)-mu_ii(:,i))...
+            *(n_spikes_train_ii{1,i}(:,j)-mu_ii(:,i))';
+        % sum the (x-mu)*(x-mu)' matrices for each trial 
+    end
+    S_k_ii{i} = 1/N_k * cov_trial_ii;
+    % calculate the S_k for each class and store into cell
+    sigma_ii = sigma_ii + N_k/N * S_k_ii{i};
+    % calculate sigma (weighted sum of S_k)
+end
+
+for n = 1:n_class
+xy = n_spikes_test_ii{n}';
+l = size(xy,1);
+% img_size = size(X);
+for j = 1:l
     
-end
-end
-[m,idx] = max(k, [], 2);
-% reshape the idx (which contains the class label) into an image.
-decisionmap = reshape(idx, img_size);
-
-figure;
- 
-%show the image
-imagesc(x,y,decisionmap);
-hold on;
-set(gca,'ydir','normal');
- 
-% colormap for the classes:
-% class 1 = light red, 2 = light green, 3 = light blue
-% cmap = [1 0.8 0.8; 0.95 1 0.95; 0.9 0.9 1]
-% colormap(cmap);
- 
-% plot the class training data.
-hold on
-plotData(data)
-plotMeans(mu_i)
-plotContour(mu_i(:,1)',sigma_i,'r');
-plotContour(mu_i(:,2)',sigma_i,'g');
-plotContour(mu_i(:,3)',sigma_i,'b');
-
-% include legend
-legend('Class 1', 'Class 2', 'Class 3','Location','NorthOutside', ...
-    'Orientation', 'horizontal');
- 
-% label the axes.
-xlabel('x');
-ylabel('y');
-
-%%
-%Model 2
-x = 0:0.1:20;
-y = 0:0.1:20;
-[X Y] = meshgrid(x,y);
-xy = [X(:) Y(:)];
-l = length(xy);
-img_size = size(X);
-for j = 1:l
+%Warning: Matrix is close to singular or badly scaled. Results may be inaccurate.
+%This happens because 
 for i = 1:n_class
-    k(j,i) = log(P_Ck)+ mu_i(:,i)'*inv(S_k_i{i})*xy(j,:)'-0.5*mu_i(:,i)'*....
-        inv(S_k_i{i})*mu_i(:,i) - 0.5*xy(j,:)*inv(S_k_i{i})*xy(j,:)';
+    k_ii(j,i) = log(P_Ck)+ mu_ii(:,i)'*inv(S_k_ii{i})*xy(j,:)'-0.5*mu_ii(:,i)'*....
+        inv(S_k_ii{i})*mu_ii(:,i) - 0.5*xy(j,:)*inv(S_k_ii{i})*xy(j,:)';
 end
 end
-[m,idx] = max(k, [], 2);
+[m_ii,idx_ii] = max(k_ii, [], 2);
+errors_ii(n)= length(idx_ii(idx_ii~=n));
+end
+accuracy_ii = sum(errors_ii)/(D_trial_ii*n_class);
 % reshape the idx (which contains the class label) into an image.
-decisionmap = reshape(idx, img_size);
-
-figure;
- 
-%show the image
-imagesc(x,y,decisionmap);
-hold on;
-set(gca,'ydir','normal');
- 
-% colormap for the classes:
-% class 1 = light red, 2 = light green, 3 = light blue
-% cmap = [1 0.8 0.8; 0.95 1 0.95; 0.9 0.9 1]
-% colormap(cmap);
- 
-% plot the class training data.
-%hold on
-plotData(data)
-plotMeans(mu_i)
-plotContour(mu_i(:,1)',S_k_i{1},'r');
-plotContour(mu_i(:,2)',S_k_i{2},'g');
-plotContour(mu_i(:,3)',S_k_i{3},'b');
- 
-% include legend
-legend('Class 1', 'Class 2', 'Class 3','Location','NorthOutside', ...
-    'Orientation', 'horizontal');
- 
-% label the axes.
-xlabel('x');
-ylabel('y');
