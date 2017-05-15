@@ -39,12 +39,12 @@ P_Ck = N_k/(n_class*N_k);
 % calculate the prior probabilities of each class (equal for all classes)
 
 mu_i = zeros(D_trial, n_class);
-cov_trial_i = zeros(D_trial, D_trial);
 S_k_i = cell(1, n_class);
-sigma_i = cov_trial_i;
+sigma_i = zeros(D_trial, D_trial);
 
 for i = 1:n_class
     mu_i(:,i) = 1/(N_k)*sum(n_spikes_train{1,i},2);
+    cov_trial_i = zeros(D_trial, D_trial);
     for j = 1:n_trial
         cov_trial_i = cov_trial_i + (n_spikes_train{1,i}(:,j)-mu_i(:,i))*(n_spikes_train{1,i}(:,j)-mu_i(:,i))';
         % sum the (x-mu)*(x-mu)' matrices for each trial 
@@ -55,3 +55,40 @@ for i = 1:n_class
     % calculate sigma (weighted sum of S_k)
 end
 
+%% Part B: Model (ii) Gaussian, Class Specific Covariance
+
+% Some neurons do not spike enough across all trials, and therefore make
+% the covariance matrix non positive definite due to their small values. We 
+% can remove these in order to ensure a positive definite sigma matrix. 
+
+n_spikes_trial = {};
+n_spikes_total = [];
+
+for i = 1:n_class
+    % sum the number of spikes for each neuron across the entire train
+    n_spikes_trial{1,i} = sum(n_spikes_train{1,i},2);
+    % sum the number of spikes for each neuron across all trials
+    n_spikes_total = [n_spikes_total, n_spikes_trial{1,i}];
+end
+
+% set the minimum spike threshold number to be 10
+thres = 10;
+% find the neurons which do not spike at least 10 times in each class, and
+% find the unique rows
+[row,col] = find(n_spikes_total<10);
+row_del = unique(row);
+
+% create a second spike train matrix to store the neurons above the
+% threshold
+n_spikes_train_ii = n_spikes_train;
+
+n_spikes_trial_ii = {};
+n_spikes_total_ii = [];
+
+for i = 1:n_class
+    % remove the below-threshold neurons across all classes
+    n_spikes_train_ii{1,i}(row_del,:) = [];
+    % check that removing these neurons worked
+    n_spikes_trial_ii{1,i} = sum(n_spikes_train_ii{1,i},2);
+    n_spikes_total_ii = [n_spikes_total_ii, n_spikes_trial_ii{1,i}];
+end
