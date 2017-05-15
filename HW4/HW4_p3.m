@@ -106,7 +106,7 @@ hold on
 plotMeans(mu_i)
 hold off
 
-%% Part D, E: Means, Covariances, and Decision Boundaries
+%% Part D: Means, Covariance Ellipses
 
 % Model (i) Gaussian, Shared Covariance
 
@@ -146,38 +146,91 @@ plotContour(mu_i(:,3)',S_k_i{3},'b');
 
 hold off
 
-%%
-
-for i = 1:n_class
-    
-    w_k(:,i) = inv(sigma_i)*mu_i(:,i);
-    w_k0(i) = ((-1/2) * mu_i(:,i)'*inv(sigma_i)*mu_i(:,i) + log(P_Ck));
-
-end
-
-w_1 = [w_k(:,2) - w_k(:,1), w_k(:,3) - w_k(:,2), w_k(:,3) - w_k(:,1)];
-w_0 = [w_k0(2) - w_k0(1), w_k0(3) - w_k0(2), w_k0(3) - w_k0(1)];
-
-% coefficients for between class comparisons
-% 1st column: Class 1 (red) and Class 2 (green)
-% 2nd column: Class 3 (blue) and Class 2 (green)
-% 3rd column: Class 3 (blue) and Class 1 (red)
-
+%% Part E: Means, CovarianceEllipses and Decision Boundaries
+%MOdel 1
 x = 0:0.1:20;
-y_1_2 = (-w_1(1,1)*x - w_0(1))/(w_1(2,1));
-y_3_2 = (-w_1(1,2)*x - w_0(2))/(w_1(2,2));
-y_3_1 = (-w_1(1,3)*x - w_0(3))/(w_1(2,3));
+y = 0:0.1:20;
+[X Y] = meshgrid(x,y);
+xy = [X(:) Y(:)];
+l = length(xy);
+img_size = size(X);
+for j = 1:l
+for i = 1:3
+    k(j,i) = log(P_Ck)+ mu_i(:,i)'*inv(sigma_i)*xy(j,:)'-0.5*mu_i(:,i)'*inv(sigma_i)*mu_i(:,i);
+    
+end
+end
+[m,idx] = max(k, [], 2);
+% reshape the idx (which contains the class label) into an image.
+decisionmap = reshape(idx, img_size);
 
-figure(6)
-
-plotData(data)
+figure;
+ 
+%show the image
+imagesc(x,y,decisionmap);
+hold on;
+set(gca,'ydir','normal');
+ 
+% colormap for the classes:
+% class 1 = light red, 2 = light green, 3 = light blue
+cmap = [1 0.8 0.8; 0.95 1 0.95; 0.9 0.9 1]
+colormap(cmap);
+ 
+% plot the class training data.
 hold on
+plotData(data)
 plotMeans(mu_i)
-plotContour(mu_i(:,1)',S_k_i{1},'r');
-plotContour(mu_i(:,2)',S_k_i{2},'g');
-plotContour(mu_i(:,3)',S_k_i{3},'b');
+% plotContour(mu_i(:,1)',sigma_i,'r');
+% plotContour(mu_i(:,2)',sigma_i,'g');
+% plotContour(mu_i(:,3)',sigma_i,'b');
 
-plot(x,y_1_2)
-plot(x,y_3_2)
-plot(x,y_3_1)
-hold off
+% include legend
+legend('Class 1', 'Class 2', 'Class 3','Location','NorthOutside', ...
+    'Orientation', 'horizontal');
+ 
+% label the axes.
+xlabel('x');
+ylabel('y');
+
+%%
+%Model 2
+x = 0:0.1:20;
+y = 0:0.1:20;
+[X Y] = meshgrid(x,y);
+xy = [X(:) Y(:)];
+l = length(xy);
+img_size = size(X);
+for j = 1:l
+for i = 1:3
+    k(j,i) = log(P_Ck)+ mu_i(:,i)'*inv(S_k_i{i})*xy(j,:)'-0.5*mu_i(:,i)'*....
+        inv(S_k_i{i})*mu_i(:,i) - 0.5*xy(j,:)*inv(S_k_i{i})*xy(j,:)';
+end
+end
+[m,idx] = max(k, [], 2);
+% reshape the idx (which contains the class label) into an image.
+decisionmap = reshape(idx, img_size);
+
+figure;
+ 
+%show the image
+imagesc(x,y,decisionmap);
+hold on;
+set(gca,'ydir','normal');
+ 
+% colormap for the classes:
+% class 1 = light red, 2 = light green, 3 = light blue
+cmap = [1 0.8 0.8; 0.95 1 0.95; 0.9 0.9 1]
+colormap(cmap);
+ 
+% plot the class training data.
+hold on
+plotData(data)
+plotMeans(mu_i)
+ 
+% include legend
+legend('Class 1', 'Class 2', 'Class 3','Location','NorthOutside', ...
+    'Orientation', 'horizontal');
+ 
+% label the axes.
+xlabel('x');
+ylabel('y');
