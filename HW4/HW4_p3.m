@@ -155,7 +155,7 @@ xy = [X(:) Y(:)];
 l = length(xy);
 img_size = size(X);
 for j = 1:l
-for i = 1:3
+for i = 1:n_class
     k(j,i) = log(P_Ck)+ mu_i(:,i)'*inv(sigma_i)*xy(j,:)'-0.5*mu_i(:,i)'*inv(sigma_i)*mu_i(:,i);
     
 end
@@ -201,7 +201,7 @@ xy = [X(:) Y(:)];
 l = length(xy);
 img_size = size(X);
 for j = 1:l
-for i = 1:3
+for i = 1:n_class
     k(j,i) = log(P_Ck)+ mu_i(:,i)'*inv(S_k_i{i})*xy(j,:)'-0.5*mu_i(:,i)'*....
         inv(S_k_i{i})*mu_i(:,i) - 0.5*xy(j,:)*inv(S_k_i{i})*xy(j,:)';
 end
@@ -223,7 +223,7 @@ set(gca,'ydir','normal');
 % colormap(cmap);
  
 % plot the class training data.
-hold on
+%hold on
 plotData(data)
 plotMeans(mu_i)
 plotContour(mu_i(:,1)',S_k_i{1},'r');
