@@ -173,16 +173,16 @@ set(gca,'ydir','normal');
  
 % colormap for the classes:
 % class 1 = light red, 2 = light green, 3 = light blue
-cmap = [1 0.8 0.8; 0.95 1 0.95; 0.9 0.9 1]
-colormap(cmap);
+% cmap = [1 0.8 0.8; 0.95 1 0.95; 0.9 0.9 1]
+% colormap(cmap);
  
 % plot the class training data.
 hold on
 plotData(data)
 plotMeans(mu_i)
-% plotContour(mu_i(:,1)',sigma_i,'r');
-% plotContour(mu_i(:,2)',sigma_i,'g');
-% plotContour(mu_i(:,3)',sigma_i,'b');
+plotContour(mu_i(:,1)',sigma_i,'r');
+plotContour(mu_i(:,2)',sigma_i,'g');
+plotContour(mu_i(:,3)',sigma_i,'b');
 
 % include legend
 legend('Class 1', 'Class 2', 'Class 3','Location','NorthOutside', ...
@@ -219,13 +219,16 @@ set(gca,'ydir','normal');
  
 % colormap for the classes:
 % class 1 = light red, 2 = light green, 3 = light blue
-cmap = [1 0.8 0.8; 0.95 1 0.95; 0.9 0.9 1]
-colormap(cmap);
+% cmap = [1 0.8 0.8; 0.95 1 0.95; 0.9 0.9 1]
+% colormap(cmap);
  
 % plot the class training data.
 hold on
 plotData(data)
 plotMeans(mu_i)
+plotContour(mu_i(:,1)',S_k_i{1},'r');
+plotContour(mu_i(:,2)',S_k_i{2},'g');
+plotContour(mu_i(:,3)',S_k_i{3},'b');
  
 % include legend
 legend('Class 1', 'Class 2', 'Class 3','Location','NorthOutside', ...
