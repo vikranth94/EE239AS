@@ -45,17 +45,17 @@ P_Ck = N_k/(n_class*N_k);
 % calculate the prior probabilities of each class (equal for all classes)
 
 mu_i = zeros(D_trial, n_class);
-cov_trial_i = zeros(D_trial, D_trial);
 S_k_i = cell(1, n_class);
-sigma_i = cov_trial_i;
+sigma_i = zeros(D_trial, D_trial);
 
 for i = 1:n_class
     mu_i(:,i) = 1/(N_k)*sum(data{1,i},2);
+    cov_trial_i = zeros(D_trial, D_trial);
     for j = 1:n_trial
         cov_trial_i = cov_trial_i + (data{1,i}(:,j)-mu_i(:,i))*(data{1,i}(:,j)-mu_i(:,i))';
         % sum the (x-mu)*(x-mu)' matrices for each trial 
     end
-    S_k_i{i} = 1/N_k * cov_trial_i/n_trial;
+    S_k_i{i} = 1/N_k * cov_trial_i;
     % calculate the S_k for each class and store into cell
     sigma_i = sigma_i + N_k/N * S_k_i{i};
     % calculate sigma (weighted sum of S_k)
