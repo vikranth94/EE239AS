@@ -1,80 +1,94 @@
-% % number of training samples to generate.
-% nsamples = n_trial;
-%  
-% % create some training data for three classes.
-% training = data;
-%  
-% % sample mean
-% sample_means = cell(length(training),1);
-% sample_means{1} = mu_i(:,1);
-% sample_means{2} = mu_i(:,2);
-% sample_means{3} = mu_i(:,3);
-% 
-%  
-% xrange = [0 20];
-% yrange = [0 20];
-% % step size for how finely you want to visualize the decision boundary.
-% inc = 0.1;
-%  
-% % generate grid coordinates. this will be the basis of the decision
-% % boundary visualization.
-% [x, y] = meshgrid(xrange(1):inc:xrange(2), yrange(1):inc:yrange(2));
-%  
-% % size of the (x, y) image, which will also be the size of the 
-% % decision boundary image that is used as the plot background.
-% image_size = size(x);
-%  
-% xy = [x(:) y(:)]; % make (x,y) pairs as a bunch of row vectors.
-% 
-% xy = [reshape(x, image_size(1)*image_size(2),1) reshape(y, image_size(1)*image_size(2),1)];
-% 
-% numxypairs = length(xy); % number of (x,y) pairs
-%  
-% % distance measure evaluations for each (x,y) pair.
-% dist = [];
-%  
-% % loop through each class and calculate distance measure for each (x,y)
-% % from the class prototype.
-% for i=1:length(training),
-%  
-%     % calculate the city block distance between every (x,y) pair and
-%     % the sample mean of the class.
-%     % the sum is over the columns to produce a distance for each (x,y)
-%     % pair.
-%     disttemp = sum(abs(xy - repmat(sample_means{i}, [numxypairs 1])), 2);
-%  
-%     % concatenate the calculated distances.
-%     dist = [dist disttemp];
-%  
-% end
-%  
-% % for each (x,y) pair, find the class that has the smallest distance.
-% % this will be the min along the 2nd dimension.
-% [m,idx] = min(dist, [], 2);
-% 
-% decisionmap = reshape(idx, image_size);
-% 
-% figure;
-%  
-% %show the image
-% imagesc(xrange,yrange,decisionmap);
-% hold on;
-% set(gca,'ydir','normal');
-%  
-% % colormap for the classes:
-% % class 1 = light red, 2 = light green, 3 = light blue
-% cmap = [1 0.8 0.8; 0.95 1 0.95; 0.9 0.9 1]
-% colormap(cmap);
-%  
-% % plot the class training data.
-% plot(training{1}(:,1),training{1}(:,2), 'r.');
-% plot(training{2}(:,1),training{2}(:,2), 'go');
-% plot(training{3}(:,1),training{3}(:,2), 'b*');
-%  
-% % include legend
-% legend('Class 1', 'Class 2', 'Class 3','Location','NorthOutside', ...
-%     'Orientation', 'horizontal');
-%  
-% % label the axes.
-% xlabel('x');
-% ylabel('y');
+% EE239AS Homework 4
+
+clc
+clear
+close all
+
+%% Problem 3: Simulated Neural Data
+
+ps4_data = importdata('ps4_realdata.mat');
+
+% 20x3 struct
+% rows = data point
+% columns = class
+
+%% Part A: ML Parameters
+
+train_data = ps4_data.train_trial;
+test_data = ps4_data.test_trial;
+% since sizes of test and train data sets are the same, extract number of
+% spikes in the same loop
+
+D_trial = 97;           % number of neurons per trial
+n_class = size(train_data,2);
+n_trial = size(train_data,1);
+n_spikes_train = cell(1, n_class);
+n_spikes_test = n_spikes_train;
+
+for i = 1:n_trial
+    for j = 1:n_class
+        n_spikes_train{1,j} = [n_spikes_train{1,j}, sum(train_data(i,j).spikes,2)];
+        n_spikes_test{1,j} = [n_spikes_test{1,j}, sum(test_data(i,j).spikes,2)]; 
+    end
+end
+
+% Model (i) Gaussian, Shared Covariance
+N_k = n_trial;
+N = N_k*n_class;
+P_Ck = N_k/(n_class*N_k);
+% calculate the prior probabilities of each class (equal for all classes)
+
+mu_i = zeros(D_trial, n_class);
+S_k_i = cell(1, n_class);
+sigma_i = zeros(D_trial, D_trial);
+
+for i = 1:n_class
+    mu_i(:,i) = 1/(N_k)*sum(n_spikes_train{1,i},2);
+    cov_trial_i = zeros(D_trial, D_trial);
+    for j = 1:n_trial
+        cov_trial_i = cov_trial_i + (n_spikes_train{1,i}(:,j)-mu_i(:,i))*(n_spikes_train{1,i}(:,j)-mu_i(:,i))';
+        % sum the (x-mu)*(x-mu)' matrices for each trial 
+    end
+    S_k_i{i} = 1/N_k * cov_trial_i/n_trial;
+    % calculate the S_k for each class and store into cell
+    sigma_i = sigma_i + N_k/N * S_k_i{i};
+    % calculate sigma (weighted sum of S_k)
+end
+
+%% Part B: Model (ii) Gaussian, Class Specific Covariance
+
+% Some neurons do not spike enough across all trials, and therefore make
+% the covariance matrix non positive definite due to their small values. We 
+% can remove these in order to ensure a positive definite sigma matrix. 
+
+n_spikes_trial = {};
+n_spikes_total = [];
+
+for i = 1:n_class
+    % sum the number of spikes for each neuron across the entire train
+    n_spikes_trial{1,i} = sum(n_spikes_train{1,i},2);
+    % sum the number of spikes for each neuron across all trials
+    n_spikes_total = [n_spikes_total, n_spikes_trial{1,i}];
+end
+
+% set the minimum spike threshold number to be 10
+thres = 5;
+% find the neurons which do not spike at least 10 times in each class, and
+% find the unique rows
+[row,col] = find(n_spikes_total<thres);
+row_del = unique(row);
+
+% create a second spike train matrix to store the neurons above the
+% threshold
+n_spikes_train_ii = n_spikes_train;
+
+n_spikes_trial_ii = {};
+n_spikes_total_ii = [];
+
+for i = 1:n_class
+    % remove the below-threshold neurons across all classes
+    n_spikes_train_ii{1,i}(row_del,:) = [];
+    % check that removing these neurons worked
+    n_spikes_trial_ii{1,i} = sum(n_spikes_train_ii{1,i},2);
+    n_spikes_total_ii = [n_spikes_total_ii, n_spikes_trial_ii{1,i}];
+end
