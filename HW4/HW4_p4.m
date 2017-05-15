@@ -54,3 +54,4 @@ for i = 1:n_class
     sigma_i = sigma_i + N_k/N * S_k_i{i};
     % calculate sigma (weighted sum of S_k)
 end
+

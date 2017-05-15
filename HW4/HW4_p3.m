@@ -26,15 +26,12 @@ for i = 1:n_trial
 end
 
 figure(1)
-plot(data{1,1}(1,:),data{1,1}(2,:),'xr', data{1,2}(1,:),data{1,2}(2,:), '+g', ...
-     data{1,3}(1,:),data{1,3}(2,:), 'ob')
-
+plotData(data)
 % plot neurons in each class in different colors
 title('2D Firing Rate Data Representation')
 xlabel('Number of Spikes (Neuron 1)')
 ylabel('Number of Spikes (Neuron 2)')
 legend('Class 1','Class 2','Class 3')
-axis([0 20 0 20])
 
 %% Part B: ML Parameters
 
@@ -97,68 +94,90 @@ disp(mu_i)
 
 %% Part C: Firing Rate Means
 
-figure(3)
-plot(data{1,1}(1,:),data{1,1}(2,:),'xr', data{1,2}(1,:),data{1,2}(2,:), '+g', ...
-     data{1,3}(1,:),data{1,3}(2,:), 'ob')
-
-title('Firing Rate Representation with Means')
+figure(2)
+plotData(data)
+title('2D Firing Rate: Means')
 xlabel('Number of Spikes (Neuron 1)')
 ylabel('Number of Spikes (Neuron 2)')
 legend('Class 1','Class 2','Class 3')
-axis([0 20 0 20])
 
 hold on
 % plot means of each class (same for each model)
-plot(mu_i(1,1), mu_i(2,1),'.r','markersize',50)
-plot(mu_i(1,2), mu_i(2,2),'.g','markersize', 50)
-plot(mu_i(1,3), mu_i(2,3),'.b','markersize', 50)
+plotMeans(mu_i)
 hold off
 
 %% Part D, E: Means, Covariances, and Decision Boundaries
 
+% Model (i) Gaussian, Shared Covariance
+
+figure(3)
+plotData(data)
+title('Model (i) Firing Rate: Means, Covariances, and Decision Boundaries')
+xlabel('Number of Spikes (Neuron 1)')
+ylabel('Number of Spikes (Neuron 2)')
+legend('Class 1','Class 2','Class 3')
+
+hold on
+% plot means of each class (same for each model)
+plotMeans(mu_i)
+
+% plot covariance ellipses for each class (shared covariance)
+plotContour(mu_i(:,1)',sigma_i,'r');
+plotContour(mu_i(:,2)',sigma_i,'g');
+plotContour(mu_i(:,3)',sigma_i,'b');
+
+hold off
+
+% Model (ii) Gaussian, Class Specific Covariance
+
 figure(4)
-plot(data{1,1}(1,:),data{1,1}(2,:),'xr', data{1,2}(1,:),data{1,2}(2,:), '+g', ...
-     data{1,3}(1,:),data{1,3}(2,:), 'ob')
-
-title('Firing Rate: Means, Covariances, and Decision Boundaries')
+plotData(data)
+title('Model (ii) Firing Rate: Means, Covariances, and Decision Boundaries')
 xlabel('Number of Spikes (Neuron 1)')
 ylabel('Number of Spikes (Neuron 2)')
 legend('Class 1','Class 2','Class 3')
-axis([0 20 0 20])
 
 hold on
 % plot means of each class (same for each model)
-plot(mu_i(1,1), mu_i(2,1),'.r','markersize',50)
-plot(mu_i(1,2), mu_i(2,2),'.g','markersize', 50)
-plot(mu_i(1,3), mu_i(2,3),'.b','markersize', 50)
+plotMeans(mu_i)
+plotContour(mu_i(:,1)',S_k_i{1},'r');
+plotContour(mu_i(:,2)',S_k_i{2},'g');
+plotContour(mu_i(:,3)',S_k_i{3},'b');
 
 hold off
-%% 
-%Part d
-%Model i
 
+%%
+
+for i = 1:n_class
+    
+    w_k(:,i) = inv(sigma_i)*mu_i(:,i);
+    w_k0(i) = ((-1/2) * mu_i(:,i)'*inv(sigma_i)*mu_i(:,i) + log(P_Ck));
+
+end
+
+w_1 = [w_k(:,2) - w_k(:,1), w_k(:,3) - w_k(:,2), w_k(:,3) - w_k(:,1)];
+w_0 = [w_k0(2) - w_k0(1), w_k0(3) - w_k0(2), w_k0(3) - w_k0(1)];
+
+% coefficients for between class comparisons
+% 1st column: Class 1 (red) and Class 2 (green)
+% 2nd column: Class 3 (blue) and Class 2 (green)
+% 3rd column: Class 3 (blue) and Class 1 (red)
+
+x = 0:0.1:20;
+y_1_2 = (-w_1(1,1)*x - w_0(1))/(w_1(2,1));
+y_3_2 = (-w_1(1,2)*x - w_0(2))/(w_1(2,2));
+y_3_1 = (-w_1(1,3)*x - w_0(3))/(w_1(2,3));
+
+figure(6)
+
+plotData(data)
 hold on
-contour_plot(mu_i(:,1)',sigma_i,'r');
-contour_plot(mu_i(:,2)',sigma_i,'g');
-contour_plot(mu_i(:,3)',sigma_i,'b');
+plotMeans(mu_i)
+plotContour(mu_i(:,1)',S_k_i{1},'r');
+plotContour(mu_i(:,2)',S_k_i{2},'g');
+plotContour(mu_i(:,3)',S_k_i{3},'b');
+
+plot(x,y_1_2)
+plot(x,y_3_2)
+plot(x,y_3_1)
 hold off
-
-%Model ii
-figure(5)
-plot(data{1,1}(1,:),data{1,1}(2,:),'xr', data{1,2}(1,:),data{1,2}(2,:), '+g', ...
-     data{1,3}(1,:),data{1,3}(2,:), 'ob')
-
-title('Firing Rate: Means, Covariances, and Decision Boundaries')
-xlabel('Number of Spikes (Neuron 1)')
-ylabel('Number of Spikes (Neuron 2)')
-legend('Class 1','Class 2','Class 3')
-axis([0 20 0 20])
-
-hold on
-% plot means of each class (same for each model)
-plot(mu_i(1,1), mu_i(2,1),'.r','markersize',50)
-plot(mu_i(1,2), mu_i(2,2),'.g','markersize', 50)
-plot(mu_i(1,3), mu_i(2,3),'.b','markersize', 50)
-contour_plot(mu_i(:,1)',S_k_i{1},'r');
-contour_plot(mu_i(:,2)',S_k_i{2},'g');
-contour_plot(mu_i(:,3)',S_k_i{3},'b');
