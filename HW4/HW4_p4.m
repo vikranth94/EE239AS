@@ -168,72 +168,68 @@ accuracy_ii = 1-sum(errors_ii)/(n_trial*n_class);
 % the covariance matrix non positive definite due to their small values. We 
 % can remove these in order to ensure a positive definite sigma matrix. 
 
-n_spikes_total = zeros(D_trial, n_class);
-for i = 1:n_class
-    % sum the number of spikes for each neuron across the entire train
-    n_spikes_class = sum(n_spikes_train{1,i},2);
-    % sum the number of spikes for each neuron across all trials
-    n_spikes_total(:,i) = n_spikes_class;
-end
+% n_spikes_total = zeros(D_trial, n_class);
+% for i = 1:n_class
+%     % sum the number of spikes for each neuron across the entire train
+%     n_spikes_class = sum(n_spikes_train{1,i},2);
+%     % sum the number of spikes for each neuron across all trials
+%     n_spikes_total(:,i) = n_spikes_class;
+% end
+% 
+% % set the minimum spike threshold number to be 5
+% % find the neurons which do not spike at least 5 times in each class, and
+% % find the unique rows
+% thres = 5;
+% [row,col] = find(n_spikes_total<=thres);
+% row_del = unique(row);
+% 
+% % create a second spike train matrix to store the neurons above the
+% % threshold
+% n_spikes_train_ii = n_spikes_train;
+% n_spikes_test_ii = n_spikes_test;
+% 
+% D_trial_ii = D_trial-length(row_del);
+% n_spikes_total_ii = zeros(D_trial_ii, n_class);
+% 
+% for i = 1:n_class
+%     % remove the below-threshold neurons across all classes
+%     n_spikes_train_ii{1,i}(row_del,:) = [];
+%     n_spikes_test_ii{1,i}(row_del,:) = [];
+% 
+%     % check that removing these neurons worked
+%     n_spikes_class_ii = sum(n_spikes_train_ii{1,i},2);
+%     n_spikes_total_ii(:,i) = n_spikes_class_ii;
+%     %n_spikes_trial_ii{1,i} = sum(n_spikes_train_ii{1,i},2);
+%     %n_spikes_total_ii = [n_spikes_total_ii, n_spikes_trial_ii{1,i}];
+% end
+% 
+% mu_ii = zeros(D_trial_ii, n_class);
+% S_k_ii = cell(1, n_class);
+% sigma_ii = zeros(D_trial_ii, D_trial_ii);
+% 
+% for i = 1:n_class
+%     mu_ii(:,i) = 1/(N_k)*sum(n_spikes_train_ii{1,i},2);
+%     cov_trial_ii = zeros(D_trial_ii, D_trial_ii);
+%     for j = 1:n_trial
+%         cov_trial_ii = cov_trial_ii + (n_spikes_train_ii{1,i}(:,j)-mu_ii(:,i))...
+%             *(n_spikes_train_ii{1,i}(:,j)-mu_ii(:,i))';
+%         % sum the (x-mu)*(x-mu)' matrices for each trial 
+%     end
+%     S_k_ii{i} = 1/N_k * cov_trial_ii;
+%     % calculate the S_k for each class and store into cell
+%     sigma_ii = sigma_ii + N_k/N * S_k_ii{i};
+%     % calculate sigma (weighted sum of S_k)
+% end
 
-% set the minimum spike threshold number to be 5
-% find the neurons which do not spike at least 5 times in each class, and
-% find the unique rows
-thres = 5;
-[row,col] = find(n_spikes_total<=thres);
-row_del = unique(row);
-
-% create a second spike train matrix to store the neurons above the
-% threshold
-n_spikes_train_ii = n_spikes_train;
-n_spikes_test_ii = n_spikes_test;
-
-D_trial_ii = D_trial-length(row_del);
-n_spikes_total_ii = zeros(D_trial_ii, n_class);
-
-for i = 1:n_class
-    % remove the below-threshold neurons across all classes
-    n_spikes_train_ii{1,i}(row_del,:) = [];
-    n_spikes_test_ii{1,i}(row_del,:) = [];
-
-    % check that removing these neurons worked
-    n_spikes_class_ii = sum(n_spikes_train_ii{1,i},2);
-    n_spikes_total_ii(:,i) = n_spikes_class_ii;
-    %n_spikes_trial_ii{1,i} = sum(n_spikes_train_ii{1,i},2);
-    %n_spikes_total_ii = [n_spikes_total_ii, n_spikes_trial_ii{1,i}];
-end
-
-mu_ii = zeros(D_trial_ii, n_class);
-S_k_ii = cell(1, n_class);
-sigma_ii = zeros(D_trial_ii, D_trial_ii);
-
-for i = 1:n_class
-    mu_ii(:,i) = 1/(N_k)*sum(n_spikes_train_ii{1,i},2);
-    cov_trial_ii = zeros(D_trial_ii, D_trial_ii);
-    for j = 1:n_trial
-        cov_trial_ii = cov_trial_ii + (n_spikes_train_ii{1,i}(:,j)-mu_ii(:,i))...
-            *(n_spikes_train_ii{1,i}(:,j)-mu_ii(:,i))';
-        % sum the (x-mu)*(x-mu)' matrices for each trial 
-    end
-    S_k_ii{i} = 1/N_k * cov_trial_ii;
-    % calculate the S_k for each class and store into cell
-    sigma_ii = sigma_ii + N_k/N * S_k_ii{i};
-    % calculate sigma (weighted sum of S_k)
-end
-
-k_ii = zeros(n_trial, n_class);
-errors_ii = zeros(1,n_class);
+k_iii = zeros(n_trial, n_class);
+errors_iii = zeros(1,n_class);
 n_neurons = length(n_spikes_class_ii);
 
 for n = 1:n_class
     xy = n_spikes_test_ii{n}';
     for j = 1:n_trial   
         for i = 1:n_class
-            p = 1;
-            for v = 1: n_neurons
-            p = p*log(P_Ck)+ sum(mu_ii(:,i)) + log(mu_ii(v,i))* xy(j,v);
-            end
-            k_iii(j,i) = p;
+            k_iii(j,i) = sum(-mu_ii(:,i) + log(mu_ii(:,i)')* xy(j,:)');
         end
     end
     [m_iii,idx_iii] = max(k_iii, [], 2);

@@ -76,7 +76,7 @@ for n = 1:n_class
     % number of incorrect classifications (not matching the specified reach
     % angle)
 end
-accuracy = 1-sum(errors)/(D_trial*n_class);
+accuracy = 1-sum(errors)/(n_trial*n_class);
 % calculate accuracy of classification
 %% Part B: Model (ii) Classification
 
@@ -159,7 +159,7 @@ for n = 1:n_class
     [m_ii,idx_ii] = max(k_ii, [], 2);
     errors_ii(n)= length(idx_ii(idx_ii~=n));
 end
-accuracy_ii = 1-sum(errors_ii)/(D_trial_ii*n_class);
+accuracy_ii = 1-sum(errors_ii)/(n_trial*n_class);
 
 %%
 % Model (iii) Poisson
@@ -223,16 +223,20 @@ end
 
 k_ii = zeros(n_trial, n_class);
 errors_ii = zeros(1,n_class);
+n_neurons = length(n_spikes_class_ii);
 
 for n = 1:n_class
     xy = n_spikes_test_ii{n}';
     for j = 1:n_trial   
         for i = 1:n_class
-            p = log(P_Ck)+ sum(mu_ii(:,i)) + log(mu_ii(:,i))* xy(i);
-            k_ii(j,i) = k_ii(j,i) * p;
+            p = 1;
+            for v = 1: n_neurons
+            p = p*log(P_Ck)+ sum(mu_ii(v,i)) - log(mu_ii(v,i))* xy(j,:);
+            end
+            k_iii(j,i) = p;
         end
     end
-    [m_ii,idx_ii] = max(k_ii, [], 2);
-    errors_ii(n)= length(idx_ii(idx_ii~=n));
+    [m_iii,idx_iii] = max(k_iii, [], 2);
+    errors_iii(n)= length(idx_iii(idx_iii~=n));
 end
-accuracy_ii = 1-sum(errors_ii)/(D_trial_ii*n_class);
+accuracy_iii = 1-sum(errors_iii)/(n_trial*n_class);

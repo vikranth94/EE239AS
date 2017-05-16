@@ -248,7 +248,10 @@ l = length(xy);
 img_size = size(X);
 for j = 1:l
 for i = 1:n_class
-    k(j,i) = log(P_Ck)+ sum(-mu_i(:,i) + log(mu_i(:,i)')* xy(j,:)');
+   % k(j,i) = log(P_Ck)+ sum(-mu_i(:,i) + log(mu_i(:,i)')* xy(j,:)');
+   for v = 1:2
+       p = p* poisspdf(X,mu(v,i))
+    k(j,i) = 
 end
 end
 [m,idx] = max(k, [], 2);
