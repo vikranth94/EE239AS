@@ -28,7 +28,7 @@ end
 figure(1)
 plotData(data)
 % plot neurons in each class in different colors
-title('2D Firing Rate Data Representation')
+title('Part A: 2D Firing Rate Data Representation')
 xlabel('Number of Spikes (Neuron 1)')
 ylabel('Number of Spikes (Neuron 2)')
 legend('Class 1','Class 2','Class 3')
@@ -96,7 +96,7 @@ disp(mu_i)
 
 figure(2)
 plotData(data)
-title('2D Firing Rate: Means')
+title('Part C: 2D Firing Rate: Means')
 xlabel('Number of Spikes (Neuron 1)')
 ylabel('Number of Spikes (Neuron 2)')
 legend('Class 1','Class 2','Class 3')
@@ -112,7 +112,7 @@ hold off
 
 figure(3)
 plotData(data)
-title('Model (i) Firing Rate: Means, Covariances, and Decision Boundaries')
+title('Part D: Model (i) Firing Rate: Means and Covariance Ellipsoids')
 xlabel('Number of Spikes (Neuron 1)')
 ylabel('Number of Spikes (Neuron 2)')
 legend('Class 1','Class 2','Class 3')
@@ -132,7 +132,7 @@ hold off
 
 figure(4)
 plotData(data)
-title('Model (ii) Firing Rate: Means, Covariances, and Decision Boundaries')
+title('Part D: Model (ii) Firing Rate: Means and Covariance Ellipsoids')
 xlabel('Number of Spikes (Neuron 1)')
 ylabel('Number of Spikes (Neuron 2)')
 legend('Class 1','Class 2','Class 3')
@@ -146,37 +146,40 @@ plotContour(mu_i(:,3)',S_k_i{3},'b');
 
 hold off
 
-%% Part E: Means, CovarianceEllipses and Decision Boundaries
-%MOdel 1
+%% Part E: Means, Covariance Ellipses and Decision Boundaries
+
+% Model (i) Gaussian, Shared Covariance
+
 x = 0:0.1:20;
 y = 0:0.1:20;
 [X Y] = meshgrid(x,y);
 xy = [X(:) Y(:)];
 l = length(xy);
 img_size = size(X);
+
 for j = 1:l
 for i = 1:n_class
-    k(j,i) = log(P_Ck)+ mu_i(:,i)'*inv(sigma_i)*xy(j,:)'-0.5*mu_i(:,i)'*inv(sigma_i)*mu_i(:,i);
+    k(j,i) = log(P_Ck)+ mu_i(:,i)'*inv(sigma_i)*xy(j,:)'-0.5*mu_i(:,i)'...
+        *inv(sigma_i)*mu_i(:,i);
     
 end
 end
+
 [m,idx] = max(k, [], 2);
 % reshape the idx (which contains the class label) into an image.
 decisionmap = reshape(idx, img_size);
 
-figure;
- 
-%show the image
+figure;             % show the image
 imagesc(x,y,decisionmap);
 hold on;
 set(gca,'ydir','normal');
- 
+
 % colormap for the classes:
 % class 1 = light red, 2 = light green, 3 = light blue
 % cmap = [1 0.8 0.8; 0.95 1 0.95; 0.9 0.9 1]
 % colormap(cmap);
  
-% plot the class training data.
+% Plot the class training data
 hold on
 plotData(data)
 plotMeans(mu_i)
@@ -184,16 +187,13 @@ plotContour(mu_i(:,1)',sigma_i,'r');
 plotContour(mu_i(:,2)',sigma_i,'g');
 plotContour(mu_i(:,3)',sigma_i,'b');
 
-% include legend
-legend('Class 1', 'Class 2', 'Class 3','Location','NorthOutside', ...
-    'Orientation', 'horizontal');
- 
-% label the axes.
-xlabel('x');
-ylabel('y');
+title('Part E: Model (i) Firing Rate: Means, Covariance Ellipsoids, and Decision Boundaries')
+xlabel('Number of Spikes (Neuron 1)')
+ylabel('Number of Spikes (Neuron 2)')
+legend('Class 1','Class 2','Class 3')
 
-%%
-%Model 2
+% Model (ii) Gaussian, Class Specific Covariance
+
 x = 0:0.1:20;
 y = 0:0.1:20;
 [X Y] = meshgrid(x,y);
@@ -223,23 +223,19 @@ set(gca,'ydir','normal');
 % colormap(cmap);
  
 % plot the class training data.
-%hold on
 plotData(data)
 plotMeans(mu_i)
 plotContour(mu_i(:,1)',S_k_i{1},'r');
 plotContour(mu_i(:,2)',S_k_i{2},'g');
 plotContour(mu_i(:,3)',S_k_i{3},'b');
  
-% include legend
-legend('Class 1', 'Class 2', 'Class 3','Location','NorthOutside', ...
-    'Orientation', 'horizontal');
- 
-% label the axes.
-xlabel('x');
-ylabel('y');
+title('Part E: Model (ii) Firing Rate: Means, Covariance Ellipsoids, and Decision Boundaries')
+xlabel('Number of Spikes (Neuron 1)')
+ylabel('Number of Spikes (Neuron 2)')
+legend('Class 1','Class 2','Class 3')
 
-%%
-%Model 3
+% Model (iii): Poisson
+
 x = 0:0.1:20;
 y = 0:0.1:20;
 [X Y] = meshgrid(x,y);
@@ -269,14 +265,10 @@ set(gca,'ydir','normal');
 % colormap(cmap);
  
 % plot the class training data.
-%hold on
 plotData(data)
 plotMeans(mu_i)
  
-% include legend
-legend('Class 1', 'Class 2', 'Class 3','Location','NorthOutside', ...
-    'Orientation', 'horizontal');
- 
-% label the axes.
-xlabel('x');
-ylabel('y');
+title('Part E: Model (iii) Firing Rate: Means and Decision Boundaries')
+xlabel('Number of Spikes (Neuron 1)')
+ylabel('Number of Spikes (Neuron 2)')
+legend('Class 1','Class 2','Class 3')
