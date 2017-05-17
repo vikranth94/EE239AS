@@ -239,19 +239,20 @@ xlabel('x');
 ylabel('y');
 
 %%
-%Model 2
+%Model 3
 x = 0:0.1:20;
 y = 0:0.1:20;
 [X Y] = meshgrid(x,y);
 xy = [X(:) Y(:)];
 l = length(xy);
 img_size = size(X);
+k_iii = [];
 for j = 1:l
 for i = 1:n_class
-    k(j,i) = log(P_Ck)+ sum(-mu_i(:,i) + log(mu_i(:,i)')* xy(j,:)');
+   k_iii(j,i) =  xy(j,:)*log(mu_i(:,i)) - sum(mu_i(:,i)') ;
 end
 end
-[m,idx] = max(k, [], 2);
+[m,idx] = max(k_iii, [], 2);
 % reshape the idx (which contains the class label) into an image.
 decisionmap = reshape(idx, img_size);
 
@@ -262,8 +263,8 @@ imagesc(x,y,decisionmap);
 hold on;
 set(gca,'ydir','normal');
  
-% colormap for the classes:
-% class 1 = light red, 2 = light green, 3 = light blue
+%colormap for the classes:
+%class 1 = light red, 2 = light green, 3 = light blue
 % cmap = [1 0.8 0.8; 0.95 1 0.95; 0.9 0.9 1]
 % colormap(cmap);
  
@@ -271,9 +272,6 @@ set(gca,'ydir','normal');
 %hold on
 plotData(data)
 plotMeans(mu_i)
-% plotContour(mu_i(:,1)',S_k_i{1},'r');
-% plotContour(mu_i(:,2)',S_k_i{2},'g');
-% plotContour(mu_i(:,3)',S_k_i{3},'b');
  
 % include legend
 legend('Class 1', 'Class 2', 'Class 3','Location','NorthOutside', ...
