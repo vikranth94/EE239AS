@@ -203,7 +203,7 @@ img_size = size(X);
 for j = 1:l
 for i = 1:n_class
     k(j,i) = log(P_Ck)+ mu_i(:,i)'*inv(S_k_i{i})*xy(j,:)'-0.5*mu_i(:,i)'*....
-        inv(S_k_i{i})*mu_i(:,i) - 0.5*xy(j,:)*inv(S_k_i{i})*xy(j,:)';
+        inv(S_k_i{i})*mu_i(:,i) - 0.5*xy(j,:)*inv(S_k_i{i})*xy(j,:)'-0.5*log(det(S_k_i{i}));
 end
 end
 [m,idx] = max(k, [], 2);

@@ -87,7 +87,7 @@ for n = 1:n_class
     % angle)
 end
 accuracy = (1-sum(errors)/(n_trial*n_class))*100;
-fprintf('Model (i) Gaussian, Shared Covariance Accuracy in percentage:')
+fprintf('Model (i) Gaussian, Shared Covariance Accuracy in %:')
 disp(accuracy)
 % calculate accuracy of classification
 
@@ -182,7 +182,7 @@ for n = 1:n_class
     for j = 1:n_trial
         for i = 1:n_class
             k_ii(j,i) = log(P_Ck)+ mu_ii(:,i)'*inv(S_k_ii{i})*xy(j,:)'-0.5*mu_ii(:,i)'*....
-                inv(S_k_ii{i})*mu_ii(:,i) - 0.5*xy(j,:)*inv(S_k_ii{i})*xy(j,:)'-0.5*log(det(S_k_ii{i}));
+                inv(S_k_ii{i})*mu_ii(:,i) - 0.5*xy(j,:)*inv(S_k_ii{i})*xy(j,:)';
         end
     end
     [m_ii,idx_ii] = max(k_ii, [], 2);
@@ -192,7 +192,7 @@ for n = 1:n_class
 end
 accuracy_ii = (1-sum(errors_ii)/(n_trial*n_class))*100;
 
-fprintf('Model (ii) Gaussian, Class-Specific Covariance Accuracy in percentage:')
+fprintf('Model (ii) Gaussian, Class-Specific Covariance Accuracy in %:\n')
 disp(accuracy_ii)
 % report accuracy
 
@@ -229,6 +229,6 @@ for n = 1:n_class
     errors_iii(n)= length(idx_iii(idx_iii~=n));
 end
 
-accuracy_iii = (1-sum(errors_iii)/(n_trial*n_class))*100;
-fprintf('Model (ii) Poisson (Naive Bayes) Accuracy in percentage:')
+accuracy_iii = (1-sum(errors_iii)/(n_trial*n_class)*100;
+fprintf('Model (ii) Poisson (Naive Bayes) Accuracy:\n')
 disp(accuracy_iii)
