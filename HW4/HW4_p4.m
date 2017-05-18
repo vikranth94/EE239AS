@@ -4,7 +4,7 @@ clc
 clear
 close all
 
-%% Problem 3: Simulated Neural Data
+%% Problem 4: Real Neural Data
 
 ps4_data = importdata('ps4_realdata.mat');
 
