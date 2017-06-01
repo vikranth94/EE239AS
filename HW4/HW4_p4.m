@@ -230,5 +230,5 @@ for n = 1:n_class
 end
 
 accuracy_iii = (1-sum(errors_iii)/(n_trial*n_class))*100;
-fprintf('Model (ii) Poisson (Naive Bayes) Accuracy in percentage:')
+fprintf('Model (iii) Poisson (Naive Bayes) Accuracy in percentage:')
 disp(accuracy_iii)

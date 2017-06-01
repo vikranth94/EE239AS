@@ -1,0 +1,649 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>HW4_p3</title><meta name="generator" content="MATLAB 9.0"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2017-05-17"><meta name="DC.source" content="HW4_p3.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">Problem 3: Simulated Neural Data</a></li><li><a href="#3">Part A: 2D Plot</a></li><li><a href="#4">Part B: ML Parameters</a></li><li><a href="#5">Part C: Firing Rate Means</a></li><li><a href="#6">Part D: Means, Covariance Ellipses</a></li><li><a href="#7">Part E: Means, Covariance Ellipses and Decision Boundaries</a></li></ul></div><pre class="codeinput"><span class="comment">% EE239AS Homework 4</span>
+
+clc
+clear
+close <span class="string">all</span>
+</pre><h2>Problem 3: Simulated Neural Data<a name="2"></a></h2><pre class="codeinput">ps3_data = importdata(<span class="string">'ps4_simdata.mat'</span>);
+
+<span class="comment">% 20x3 struct</span>
+<span class="comment">% rows = data point</span>
+<span class="comment">% columns = class</span>
+</pre><h2>Part A: 2D Plot<a name="3"></a></h2><pre class="codeinput">D_trial = 2;
+n_class = size(ps3_data,2);
+n_trial = size(ps3_data,1);
+data = cell(1, n_class);
+
+<span class="keyword">for</span> i = 1:n_trial
+    <span class="keyword">for</span> j = 1:n_class
+        data{1,j} = [data{1,j}, ps3_data(i,j).x];
+        <span class="comment">% organize data into cell for easier access</span>
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+figure(1)
+plotData(data)
+<span class="comment">% plot neurons in each class in different colors</span>
+title(<span class="string">'Part A: 2D Firing Rate Data Representation'</span>)
+xlabel(<span class="string">'Number of Spikes (Neuron 1)'</span>)
+ylabel(<span class="string">'Number of Spikes (Neuron 2)'</span>)
+legend(<span class="string">'Class 1'</span>,<span class="string">'Class 2'</span>,<span class="string">'Class 3'</span>)
+</pre><img vspace="5" hspace="5" src="HW4_p3_01.png" style="width:560px;height:420px;" alt=""> <h2>Part B: ML Parameters<a name="4"></a></h2><pre class="codeinput"><span class="comment">% Model (i) Gaussian, Shared Covariance</span>
+N_k = n_trial;
+N = N_k*n_class;
+P_Ck = N_k/(n_class*N_k);
+<span class="comment">% calculate the prior probabilities of each class (equal for all classes)</span>
+
+mu_i = zeros(D_trial, n_class);
+S_k_i = cell(1, n_class);
+sigma_i = zeros(D_trial, D_trial);
+
+<span class="keyword">for</span> i = 1:n_class
+    mu_i(:,i) = 1/(N_k)*sum(data{1,i},2);
+    cov_trial_i = zeros(D_trial, D_trial);
+    <span class="keyword">for</span> j = 1:n_trial
+        cov_trial_i = cov_trial_i + (data{1,i}(:,j)-mu_i(:,i))*(data{1,i}(:,j)-mu_i(:,i))';
+        <span class="comment">% sum the (x-mu)*(x-mu)' matrices for each trial</span>
+    <span class="keyword">end</span>
+    S_k_i{i} = 1/N_k * cov_trial_i;
+    <span class="comment">% calculate the S_k for each class and store into cell</span>
+    sigma_i = sigma_i + N_k/N * S_k_i{i};
+    <span class="comment">% calculate sigma (weighted sum of S_k)</span>
+<span class="keyword">end</span>
+
+fprintf(<span class="string">'Model (i) Gaussian, Shared Covariance\n------------------------\n\n'</span>)
+disp(<span class="string">'Probability of Each Class:'</span>)
+disp(P_Ck)
+disp(<span class="string">'Means:'</span>)
+disp(mu_i)
+disp(<span class="string">'Covariance Matrix:'</span>)
+disp(sigma_i)
+
+<span class="comment">% Model (ii) Gaussian, Class Specific Covariance</span>
+
+<span class="comment">% Class probabilities and mean are the same as Model (i).</span>
+<span class="comment">% The covariance matrices are specific to each class, as opposed to the</span>
+<span class="comment">% weighted sum in Model (i).</span>
+fprintf(<span class="string">'Model (ii) Gaussian, Class Specific Covariance\n------------------------\n\n'</span>)
+disp(<span class="string">'Probability of Each Class:'</span>)
+disp(P_Ck)
+disp(<span class="string">'Means:'</span>)
+disp(mu_i)
+disp(<span class="string">'Covariance Matrix (Class 1):'</span>)
+disp(S_k_i{1})
+disp(<span class="string">'Covariance Matrix (Class 2):'</span>)
+disp(S_k_i{2})
+disp(<span class="string">'Covariance Matrix (Class 3):'</span>)
+disp(S_k_i{3})
+
+<span class="comment">% Model (iii) Poisson</span>
+
+<span class="comment">% Class probabilities and mean firing rate are the same as Model (i).</span>
+fprintf(<span class="string">'Model (iii) Poisson, Class Specific Covariance\n------------------------\n\n'</span>)
+disp(<span class="string">'Probability of Each Class:'</span>)
+disp(P_Ck)
+disp(<span class="string">'Mean Firing Rates:'</span>)
+disp(mu_i)
+</pre><pre class="codeoutput">Model (i) Gaussian, Shared Covariance
+------------------------
+
+Probability of Each Class:
+    0.3333
+
+Means:
+   10.7500    9.6000    4.3000
+    5.5500   10.1000    9.0000
+
+Covariance Matrix:
+   11.9792   -0.0242
+   -0.0242   12.5125
+
+Model (ii) Gaussian, Class Specific Covariance
+------------------------
+
+Probability of Each Class:
+    0.3333
+
+Means:
+   10.7500    9.6000    4.3000
+    5.5500   10.1000    9.0000
+
+Covariance Matrix (Class 1):
+   20.9875    2.1375
+    2.1375    7.2475
+
+Covariance Matrix (Class 2):
+    9.5400   -4.7100
+   -4.7100   15.7900
+
+Covariance Matrix (Class 3):
+    5.4100    2.5000
+    2.5000   14.5000
+
+Model (iii) Poisson, Class Specific Covariance
+------------------------
+
+Probability of Each Class:
+    0.3333
+
+Mean Firing Rates:
+   10.7500    9.6000    4.3000
+    5.5500   10.1000    9.0000
+
+</pre><h2>Part C: Firing Rate Means<a name="5"></a></h2><pre class="codeinput">figure(2)
+plotData(data)
+title(<span class="string">'Part C: 2D Firing Rate: Means'</span>)
+xlabel(<span class="string">'Number of Spikes (Neuron 1)'</span>)
+ylabel(<span class="string">'Number of Spikes (Neuron 2)'</span>)
+legend(<span class="string">'Class 1'</span>,<span class="string">'Class 2'</span>,<span class="string">'Class 3'</span>)
+
+hold <span class="string">on</span>
+<span class="comment">% plot means of each class (same for each model)</span>
+plotMeans(mu_i)
+hold <span class="string">off</span>
+</pre><img vspace="5" hspace="5" src="HW4_p3_02.png" style="width:560px;height:420px;" alt=""> <h2>Part D: Means, Covariance Ellipses<a name="6"></a></h2><pre class="codeinput"><span class="comment">% Model (i) Gaussian, Shared Covariance</span>
+
+figure(3)
+plotData(data)
+title(<span class="string">'Part D: Model (i) Firing Rate: Means and Covariance Ellipsoids'</span>)
+xlabel(<span class="string">'Number of Spikes (Neuron 1)'</span>)
+ylabel(<span class="string">'Number of Spikes (Neuron 2)'</span>)
+legend(<span class="string">'Class 1'</span>,<span class="string">'Class 2'</span>,<span class="string">'Class 3'</span>)
+
+hold <span class="string">on</span>
+<span class="comment">% plot means of each class (same for each model)</span>
+plotMeans(mu_i)
+
+<span class="comment">% plot covariance ellipses for each class (shared covariance)</span>
+plotContour(mu_i(:,1)',sigma_i,<span class="string">'r'</span>);
+plotContour(mu_i(:,2)',sigma_i,<span class="string">'g'</span>);
+plotContour(mu_i(:,3)',sigma_i,<span class="string">'b'</span>);
+
+hold <span class="string">off</span>
+
+<span class="comment">% Model (ii) Gaussian, Class Specific Covariance</span>
+
+figure(4)
+plotData(data)
+title(<span class="string">'Part D: Model (ii) Firing Rate: Means and Covariance Ellipsoids'</span>)
+xlabel(<span class="string">'Number of Spikes (Neuron 1)'</span>)
+ylabel(<span class="string">'Number of Spikes (Neuron 2)'</span>)
+legend(<span class="string">'Class 1'</span>,<span class="string">'Class 2'</span>,<span class="string">'Class 3'</span>)
+
+hold <span class="string">on</span>
+<span class="comment">% plot means of each class (same for each model)</span>
+plotMeans(mu_i)
+plotContour(mu_i(:,1)',S_k_i{1},<span class="string">'r'</span>);
+plotContour(mu_i(:,2)',S_k_i{2},<span class="string">'g'</span>);
+plotContour(mu_i(:,3)',S_k_i{3},<span class="string">'b'</span>);
+
+hold <span class="string">off</span>
+</pre><img vspace="5" hspace="5" src="HW4_p3_03.png" style="width:560px;height:420px;" alt=""> <img vspace="5" hspace="5" src="HW4_p3_04.png" style="width:560px;height:420px;" alt=""> <h2>Part E: Means, Covariance Ellipses and Decision Boundaries<a name="7"></a></h2><pre class="codeinput"><span class="comment">% Model (i) Gaussian, Shared Covariance</span>
+
+x = 0:0.1:20;
+y = 0:0.1:20;
+[X Y] = meshgrid(x,y);
+xy = [X(:) Y(:)];
+l = length(xy);
+img_size = size(X);
+
+<span class="keyword">for</span> j = 1:l
+<span class="keyword">for</span> i = 1:n_class
+    k(j,i) = log(P_Ck)+ mu_i(:,i)'*inv(sigma_i)*xy(j,:)'-0.5*mu_i(:,i)'<span class="keyword">...</span>
+        *inv(sigma_i)*mu_i(:,i);
+
+<span class="keyword">end</span>
+<span class="keyword">end</span>
+
+[m,idx] = max(k, [], 2);
+<span class="comment">% reshape the idx (which contains the class label) into an image.</span>
+decisionmap = reshape(idx, img_size);
+
+figure;             <span class="comment">% show the image</span>
+imagesc(x,y,decisionmap);
+hold <span class="string">on</span>;
+set(gca,<span class="string">'ydir'</span>,<span class="string">'normal'</span>);
+
+<span class="comment">% colormap for the classes:</span>
+<span class="comment">% class 1 = light red, 2 = light green, 3 = light blue</span>
+<span class="comment">% cmap = [1 0.8 0.8; 0.95 1 0.95; 0.9 0.9 1]</span>
+<span class="comment">% colormap(cmap);</span>
+
+<span class="comment">% Plot the class training data</span>
+hold <span class="string">on</span>
+plotData(data)
+plotMeans(mu_i)
+plotContour(mu_i(:,1)',sigma_i,<span class="string">'r'</span>);
+plotContour(mu_i(:,2)',sigma_i,<span class="string">'g'</span>);
+plotContour(mu_i(:,3)',sigma_i,<span class="string">'b'</span>);
+
+title(<span class="string">'Part E: Model (i) Firing Rate: Means, Covariance Ellipsoids, and Decision Boundaries'</span>)
+xlabel(<span class="string">'Number of Spikes (Neuron 1)'</span>)
+ylabel(<span class="string">'Number of Spikes (Neuron 2)'</span>)
+legend(<span class="string">'Class 1'</span>,<span class="string">'Class 2'</span>,<span class="string">'Class 3'</span>)
+
+<span class="comment">% Model (ii) Gaussian, Class Specific Covariance</span>
+
+x = 0:0.1:20;
+y = 0:0.1:20;
+[X Y] = meshgrid(x,y);
+xy = [X(:) Y(:)];
+l = length(xy);
+img_size = size(X);
+<span class="keyword">for</span> j = 1:l
+<span class="keyword">for</span> i = 1:n_class
+    k(j,i) = log(P_Ck)+ mu_i(:,i)'*inv(S_k_i{i})*xy(j,:)'-0.5*mu_i(:,i)'*<span class="keyword">...</span><span class="comment">.</span>
+        inv(S_k_i{i})*mu_i(:,i) - 0.5*xy(j,:)*inv(S_k_i{i})*xy(j,:)'-0.5*log(det(S_k_i{i}));
+<span class="keyword">end</span>
+<span class="keyword">end</span>
+[m,idx] = max(k, [], 2);
+<span class="comment">% reshape the idx (which contains the class label) into an image.</span>
+decisionmap = reshape(idx, img_size);
+
+figure;
+
+<span class="comment">%show the image</span>
+imagesc(x,y,decisionmap);
+hold <span class="string">on</span>;
+set(gca,<span class="string">'ydir'</span>,<span class="string">'normal'</span>);
+
+<span class="comment">% colormap for the classes:</span>
+<span class="comment">% class 1 = light red, 2 = light green, 3 = light blue</span>
+<span class="comment">% cmap = [1 0.8 0.8; 0.95 1 0.95; 0.9 0.9 1]</span>
+<span class="comment">% colormap(cmap);</span>
+
+<span class="comment">% plot the class training data.</span>
+plotData(data)
+plotMeans(mu_i)
+plotContour(mu_i(:,1)',S_k_i{1},<span class="string">'r'</span>);
+plotContour(mu_i(:,2)',S_k_i{2},<span class="string">'g'</span>);
+plotContour(mu_i(:,3)',S_k_i{3},<span class="string">'b'</span>);
+
+title(<span class="string">'Part E: Model (ii) Firing Rate: Means, Covariance Ellipsoids, and Decision Boundaries'</span>)
+xlabel(<span class="string">'Number of Spikes (Neuron 1)'</span>)
+ylabel(<span class="string">'Number of Spikes (Neuron 2)'</span>)
+legend(<span class="string">'Class 1'</span>,<span class="string">'Class 2'</span>,<span class="string">'Class 3'</span>)
+
+<span class="comment">% Model (iii): Poisson</span>
+
+x = 0:0.1:20;
+y = 0:0.1:20;
+[X Y] = meshgrid(x,y);
+xy = [X(:) Y(:)];
+l = length(xy);
+img_size = size(X);
+k_iii = [];
+<span class="keyword">for</span> j = 1:l
+<span class="keyword">for</span> i = 1:n_class
+   k_iii(j,i) =  xy(j,:)*log(mu_i(:,i)) - sum(mu_i(:,i)') ;
+<span class="keyword">end</span>
+<span class="keyword">end</span>
+[m,idx] = max(k_iii, [], 2);
+<span class="comment">% reshape the idx (which contains the class label) into an image.</span>
+decisionmap = reshape(idx, img_size);
+
+figure;
+
+<span class="comment">%show the image</span>
+imagesc(x,y,decisionmap);
+hold <span class="string">on</span>;
+set(gca,<span class="string">'ydir'</span>,<span class="string">'normal'</span>);
+
+<span class="comment">%colormap for the classes:</span>
+<span class="comment">%class 1 = light red, 2 = light green, 3 = light blue</span>
+<span class="comment">% cmap = [1 0.8 0.8; 0.95 1 0.95; 0.9 0.9 1]</span>
+<span class="comment">% colormap(cmap);</span>
+
+<span class="comment">% plot the class training data.</span>
+plotData(data)
+plotMeans(mu_i)
+
+title(<span class="string">'Part E: Model (iii) Firing Rate: Means and Decision Boundaries'</span>)
+xlabel(<span class="string">'Number of Spikes (Neuron 1)'</span>)
+ylabel(<span class="string">'Number of Spikes (Neuron 2)'</span>)
+legend(<span class="string">'Class 1'</span>,<span class="string">'Class 2'</span>,<span class="string">'Class 3'</span>)
+</pre><img vspace="5" hspace="5" src="HW4_p3_05.png" style="width:560px;height:420px;" alt=""> <img vspace="5" hspace="5" src="HW4_p3_06.png" style="width:560px;height:420px;" alt=""> <img vspace="5" hspace="5" src="HW4_p3_07.png" style="width:560px;height:420px;" alt=""> <p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2016a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+% EE239AS Homework 4
+
+clc
+clear
+close all
+%% Problem 3: Simulated Neural Data
+
+ps3_data = importdata('ps4_simdata.mat');
+
+% 20x3 struct
+% rows = data point
+% columns = class
+
+%% Part A: 2D Plot
+
+D_trial = 2;
+n_class = size(ps3_data,2);
+n_trial = size(ps3_data,1);
+data = cell(1, n_class);
+
+for i = 1:n_trial
+    for j = 1:n_class
+        data{1,j} = [data{1,j}, ps3_data(i,j).x];
+        % organize data into cell for easier access
+    end
+end
+
+figure(1)
+plotData(data)
+% plot neurons in each class in different colors
+title('Part A: 2D Firing Rate Data Representation')
+xlabel('Number of Spikes (Neuron 1)')
+ylabel('Number of Spikes (Neuron 2)')
+legend('Class 1','Class 2','Class 3')
+
+%% Part B: ML Parameters
+
+% Model (i) Gaussian, Shared Covariance
+N_k = n_trial;
+N = N_k*n_class;
+P_Ck = N_k/(n_class*N_k);
+% calculate the prior probabilities of each class (equal for all classes)
+
+mu_i = zeros(D_trial, n_class);
+S_k_i = cell(1, n_class);
+sigma_i = zeros(D_trial, D_trial);
+
+for i = 1:n_class
+    mu_i(:,i) = 1/(N_k)*sum(data{1,i},2);
+    cov_trial_i = zeros(D_trial, D_trial);
+    for j = 1:n_trial
+        cov_trial_i = cov_trial_i + (data{1,i}(:,j)-mu_i(:,i))*(data{1,i}(:,j)-mu_i(:,i))';
+        % sum the (x-mu)*(x-mu)' matrices for each trial 
+    end
+    S_k_i{i} = 1/N_k * cov_trial_i;
+    % calculate the S_k for each class and store into cell
+    sigma_i = sigma_i + N_k/N * S_k_i{i};
+    % calculate sigma (weighted sum of S_k)
+end
+
+fprintf('Model (i) Gaussian, Shared Covariance\nREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH\n\n')
+disp('Probability of Each Class:')
+disp(P_Ck)
+disp('Means:')
+disp(mu_i)
+disp('Covariance Matrix:')
+disp(sigma_i)
+
+% Model (ii) Gaussian, Class Specific Covariance
+
+% Class probabilities and mean are the same as Model (i).
+% The covariance matrices are specific to each class, as opposed to the
+% weighted sum in Model (i).
+fprintf('Model (ii) Gaussian, Class Specific Covariance\nREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH\n\n')
+disp('Probability of Each Class:')
+disp(P_Ck)
+disp('Means:')
+disp(mu_i)
+disp('Covariance Matrix (Class 1):')
+disp(S_k_i{1})
+disp('Covariance Matrix (Class 2):')
+disp(S_k_i{2})
+disp('Covariance Matrix (Class 3):')
+disp(S_k_i{3})
+
+% Model (iii) Poisson
+
+% Class probabilities and mean firing rate are the same as Model (i).
+fprintf('Model (iii) Poisson, Class Specific Covariance\nREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH\n\n')
+disp('Probability of Each Class:')
+disp(P_Ck)
+disp('Mean Firing Rates:')
+disp(mu_i)
+
+%% Part C: Firing Rate Means
+
+figure(2)
+plotData(data)
+title('Part C: 2D Firing Rate: Means')
+xlabel('Number of Spikes (Neuron 1)')
+ylabel('Number of Spikes (Neuron 2)')
+legend('Class 1','Class 2','Class 3')
+
+hold on
+% plot means of each class (same for each model)
+plotMeans(mu_i)
+hold off
+
+%% Part D: Means, Covariance Ellipses
+
+% Model (i) Gaussian, Shared Covariance
+
+figure(3)
+plotData(data)
+title('Part D: Model (i) Firing Rate: Means and Covariance Ellipsoids')
+xlabel('Number of Spikes (Neuron 1)')
+ylabel('Number of Spikes (Neuron 2)')
+legend('Class 1','Class 2','Class 3')
+
+hold on
+% plot means of each class (same for each model)
+plotMeans(mu_i)
+
+% plot covariance ellipses for each class (shared covariance)
+plotContour(mu_i(:,1)',sigma_i,'r');
+plotContour(mu_i(:,2)',sigma_i,'g');
+plotContour(mu_i(:,3)',sigma_i,'b');
+
+hold off
+
+% Model (ii) Gaussian, Class Specific Covariance
+
+figure(4)
+plotData(data)
+title('Part D: Model (ii) Firing Rate: Means and Covariance Ellipsoids')
+xlabel('Number of Spikes (Neuron 1)')
+ylabel('Number of Spikes (Neuron 2)')
+legend('Class 1','Class 2','Class 3')
+
+hold on
+% plot means of each class (same for each model)
+plotMeans(mu_i)
+plotContour(mu_i(:,1)',S_k_i{1},'r');
+plotContour(mu_i(:,2)',S_k_i{2},'g');
+plotContour(mu_i(:,3)',S_k_i{3},'b');
+
+hold off
+
+%% Part E: Means, Covariance Ellipses and Decision Boundaries
+
+% Model (i) Gaussian, Shared Covariance
+
+x = 0:0.1:20;
+y = 0:0.1:20;
+[X Y] = meshgrid(x,y);
+xy = [X(:) Y(:)];
+l = length(xy);
+img_size = size(X);
+
+for j = 1:l
+for i = 1:n_class
+    k(j,i) = log(P_Ck)+ mu_i(:,i)'*inv(sigma_i)*xy(j,:)'-0.5*mu_i(:,i)'...
+        *inv(sigma_i)*mu_i(:,i);
+    
+end
+end
+
+[m,idx] = max(k, [], 2);
+% reshape the idx (which contains the class label) into an image.
+decisionmap = reshape(idx, img_size);
+
+figure;             % show the image
+imagesc(x,y,decisionmap);
+hold on;
+set(gca,'ydir','normal');
+
+% colormap for the classes:
+% class 1 = light red, 2 = light green, 3 = light blue
+% cmap = [1 0.8 0.8; 0.95 1 0.95; 0.9 0.9 1]
+% colormap(cmap);
+ 
+% Plot the class training data
+hold on
+plotData(data)
+plotMeans(mu_i)
+plotContour(mu_i(:,1)',sigma_i,'r');
+plotContour(mu_i(:,2)',sigma_i,'g');
+plotContour(mu_i(:,3)',sigma_i,'b');
+
+title('Part E: Model (i) Firing Rate: Means, Covariance Ellipsoids, and Decision Boundaries')
+xlabel('Number of Spikes (Neuron 1)')
+ylabel('Number of Spikes (Neuron 2)')
+legend('Class 1','Class 2','Class 3')
+
+% Model (ii) Gaussian, Class Specific Covariance
+
+x = 0:0.1:20;
+y = 0:0.1:20;
+[X Y] = meshgrid(x,y);
+xy = [X(:) Y(:)];
+l = length(xy);
+img_size = size(X);
+for j = 1:l
+for i = 1:n_class
+    k(j,i) = log(P_Ck)+ mu_i(:,i)'*inv(S_k_i{i})*xy(j,:)'-0.5*mu_i(:,i)'*....
+        inv(S_k_i{i})*mu_i(:,i) - 0.5*xy(j,:)*inv(S_k_i{i})*xy(j,:)'-0.5*log(det(S_k_i{i}));
+end
+end
+[m,idx] = max(k, [], 2);
+% reshape the idx (which contains the class label) into an image.
+decisionmap = reshape(idx, img_size);
+
+figure;
+ 
+%show the image
+imagesc(x,y,decisionmap);
+hold on;
+set(gca,'ydir','normal');
+ 
+% colormap for the classes:
+% class 1 = light red, 2 = light green, 3 = light blue
+% cmap = [1 0.8 0.8; 0.95 1 0.95; 0.9 0.9 1]
+% colormap(cmap);
+ 
+% plot the class training data.
+plotData(data)
+plotMeans(mu_i)
+plotContour(mu_i(:,1)',S_k_i{1},'r');
+plotContour(mu_i(:,2)',S_k_i{2},'g');
+plotContour(mu_i(:,3)',S_k_i{3},'b');
+ 
+title('Part E: Model (ii) Firing Rate: Means, Covariance Ellipsoids, and Decision Boundaries')
+xlabel('Number of Spikes (Neuron 1)')
+ylabel('Number of Spikes (Neuron 2)')
+legend('Class 1','Class 2','Class 3')
+
+% Model (iii): Poisson
+
+x = 0:0.1:20;
+y = 0:0.1:20;
+[X Y] = meshgrid(x,y);
+xy = [X(:) Y(:)];
+l = length(xy);
+img_size = size(X);
+k_iii = [];
+for j = 1:l
+for i = 1:n_class
+   k_iii(j,i) =  xy(j,:)*log(mu_i(:,i)) - sum(mu_i(:,i)') ;
+end
+end
+[m,idx] = max(k_iii, [], 2);
+% reshape the idx (which contains the class label) into an image.
+decisionmap = reshape(idx, img_size);
+
+figure;
+ 
+%show the image
+imagesc(x,y,decisionmap);
+hold on;
+set(gca,'ydir','normal');
+ 
+%colormap for the classes:
+%class 1 = light red, 2 = light green, 3 = light blue
+% cmap = [1 0.8 0.8; 0.95 1 0.95; 0.9 0.9 1]
+% colormap(cmap);
+ 
+% plot the class training data.
+plotData(data)
+plotMeans(mu_i)
+ 
+title('Part E: Model (iii) Firing Rate: Means and Decision Boundaries')
+xlabel('Number of Spikes (Neuron 1)')
+ylabel('Number of Spikes (Neuron 2)')
+legend('Class 1','Class 2','Class 3')
+##### SOURCE END #####
+--></body></html>
