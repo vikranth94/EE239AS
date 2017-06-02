@@ -19,8 +19,8 @@ for i = 1:n_trials
 end
 
 u_targets = unique(targets', 'rows');
-ntargets = length(u_targets);
-fprintf('Number of Unique Targets: %d \n', n_u_targets)
+n_targets = length(u_targets);
+fprintf('Number of Unique Targets: %d \n', n_targets)
 
 figure(1)
 scatter(u_targets(:,1), u_targets(:,2))
@@ -141,7 +141,7 @@ for i = 1:n_trials
         iter(1) = iter(1)+1;
         % iterate if correct target
         full_reach_raster = full(R(i).spikeRaster);
-        reach_raster{1}(:,:,iter(1)) = full_reach_raster(:,1:501);
+        reach_raster{1}(:,:,iter(1)) = full_reach_raster(:,1:500);
         % convert spike train to full matrix and save first 500 ms
     end
     if (isequal(R(i).target(1:2),reach_target(:,2)))
@@ -149,7 +149,7 @@ for i = 1:n_trials
         iter(2) = iter(2)+1;
         % iterate if correct target
         full_reach_raster = full(R(i).spikeRaster);
-        reach_raster{2}(:,:,iter(2)) = full_reach_raster(:,1:501);
+        reach_raster{2}(:,:,iter(2)) = full_reach_raster(:,1:500);
         % convert spike train to full matrix and save first 500 ms
     end
     if (isequal(R(i).target(1:2),reach_target(:,3)))
@@ -157,7 +157,7 @@ for i = 1:n_trials
         iter(3) = iter(3)+1;
         % iterate if correct target
         full_reach_raster = full(R(i).spikeRaster);
-        reach_raster{3}(:,:,iter(3)) = full_reach_raster(:,1:501);
+        reach_raster{3}(:,:,iter(3)) = full_reach_raster(:,1:500);
         % convert spike train to full matrix and save first 500 ms
     end
     if (isequal(R(i).target(1:2),reach_target(:,4)))
@@ -165,7 +165,7 @@ for i = 1:n_trials
         iter(4) = iter(4)+1;
         % iterate if correct target
         full_reach_raster = full(R(i).spikeRaster);
-        reach_raster{4}(:,:,iter(4)) = full_reach_raster(:,1:501);
+        reach_raster{4}(:,:,iter(4)) = full_reach_raster(:,1:500);
         % convert spike train to full matrix and save first 500 ms
     end
     if (isequal(R(i).target(1:2),reach_target(:,5)))
@@ -173,7 +173,7 @@ for i = 1:n_trials
         iter(5) = iter(5)+1;
         % iterate if correct target
         full_reach_raster = full(R(i).spikeRaster);
-        reach_raster{5}(:,:,iter(5)) = full_reach_raster(:,1:501);
+        reach_raster{5}(:,:,iter(5)) = full_reach_raster(:,1:500);
         % convert spike train to full matrix and save first 500 ms
     end
     if (isequal(R(i).target(1:2),reach_target(:,6)))
@@ -181,7 +181,7 @@ for i = 1:n_trials
         iter(6) = iter(6)+1;
         % iterate if correct target
         full_reach_raster = full(R(i).spikeRaster);
-        reach_raster{6}(:,:,iter(6)) = full_reach_raster(:,1:501);
+        reach_raster{6}(:,:,iter(6)) = full_reach_raster(:,1:500);
         % convert spike train to full matrix and save first 500 ms
     end
     if (isequal(R(i).target(1:2),reach_target(:,7)))
@@ -189,7 +189,7 @@ for i = 1:n_trials
         iter(7) = iter(7)+1;
         % iterate if correct target
         full_reach_raster = full(R(i).spikeRaster);
-        reach_raster{7}(:,:,iter(7)) = full_reach_raster(:,1:501);
+        reach_raster{7}(:,:,iter(7)) = full_reach_raster(:,1:500);
         % convert spike train to full matrix and save first 500 ms
     end
     if (isequal(R(i).target(1:2),reach_target(:,8)))
@@ -197,7 +197,7 @@ for i = 1:n_trials
         iter(8) = iter(8)+1;
         % iterate if correct target
         full_reach_raster = full(R(i).spikeRaster);
-        reach_raster{8}(:,:,iter(8)) = full_reach_raster(:,1:501);
+        reach_raster{8}(:,:,iter(8)) = full_reach_raster(:,1:500);
         % convert spike train to full matrix and save first 500 ms
     end
     if (isequal(R(i).target(1:2),reach_target(:,9)))
@@ -205,7 +205,7 @@ for i = 1:n_trials
         iter(9) = iter(9)+1;
         % iterate if correct target
         full_reach_raster = full(R(i).spikeRaster);
-        reach_raster{9}(:,:,iter(9)) = full_reach_raster(:,1:501);
+        reach_raster{9}(:,:,iter(9)) = full_reach_raster(:,1:500);
         % convert spike train to full matrix and save first 500 ms
     end
 end
@@ -213,7 +213,7 @@ end
 dt = 25;
 spike_count = cell(1,n_targets);
 spike_avg = cell(1,n_targets);
-%%
+
 spike_avg_smooth = cell(1,n_targets);
 
 for i = 1:n_targets
@@ -224,19 +224,17 @@ for i = 1:n_targets
     % iter(i) is the number of trials for each direction
 end
 
+
 figure(3)
-t_plot = 1:dt:501;
+t_plot = 25:dt:500;
 % time axis
 plot(t_plot, spike_avg_smooth{1}, t_plot, spike_avg_smooth{2}, t_plot, spike_avg_smooth{3},...
     t_plot, spike_avg_smooth{4}, t_plot, spike_avg_smooth{6}, t_plot, spike_avg_smooth{7},...
     t_plot, spike_avg_smooth{8}, t_plot, spike_avg_smooth{9})
-axis([0 501 0 3.5])
+axis([25 500 0 3.5])
 title('Part I: PSTHs for Eight Reach Directions')
 xlabel('Time (ms)')
 ylabel('Number of Spikes Per Bin')
-
-figure(4)
-plot(t_plot, spike_avg{1})
 
 % tells you avg firing rate for electrode when reaching to target
 % plotting lambda(t) for poisson process -- avg firing rate through time
