@@ -5,6 +5,7 @@ function [c0, c1, theta0] = tcFit(theta, y, plotFlag)
 %f = k0+k1*sind(x)+k2*cosd(x);
 F = @(x,xdata)x(1) + x(2)*cosd(xdata - x(3));
 x0 = [1 1 100];
+% options = optimset('Display','off');
 [x,resnorm,~,exitflag,output] = lsqcurvefit(F,x0,theta,y);
 hold on
 
@@ -13,7 +14,6 @@ c1 = x(2);
 theta0 = x(3);
 
 if plotFlag == 1
-    figure
     plot(theta,y,'rx')
     hold on
     t = 0:360;

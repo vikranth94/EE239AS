@@ -1,16 +1,20 @@
 %% EE239AS HW #6
-
+clc
+clear 
+close all
+% Collaborators: Vikranth, Yusi
 %% Problem 1
 
 load('/Users/Yusi/Documents/EE239AS/HW6/JR_2015-12-04_truncated2.mat');
 
-%% Part A
+%% Part A: Number of Trials
 
 n_trials = length(R);
+fprintf('Number of Trials: %d \n', n_trials)
 
 % The number of trials performed by Monkey J is 506. 
 
-%% Part B
+%% Part B: Number of Targets
 
 targets = zeros(2,n_trials);
 
@@ -26,9 +30,9 @@ figure(1)
 scatter(u_targets(:,1), u_targets(:,2))
 title('Part B: 2D Representation of Targets')
 xlabel('X-Position (mm)')
-xlabel('Y-Position (mm)')
+ylabel('Y-Position (mm)')
 
-%% Part C
+%% Part C: Number of Failed Trials
 
 n_successes = 0;
 
@@ -40,7 +44,7 @@ n_fails = n_trials - n_successes;
 
 fprintf('\nNumber of Failed Trials: %d \n', n_fails)
 
-%% Part D
+%% Part D: Sampling Rate
 
 rate = zeros(1,n_trials);
 
@@ -51,21 +55,14 @@ for i = 1:n_trials
 end
 
 rate_avg = mean(rate);
+fprintf('\nAverage Sampling Rate: %2.2f Hz\n', rate_avg)
 
 % No, the system does not sample at 1000 Hz. If it did, then the rate
 % should be 1000 since there would be a unique data sample at every time
 % point (1 ms). Sometimes the cursor does not move, which accounts for a
-% slightly varing rate per trial.
+% slightly varing rate per trial. It samples at around 60 Hz. 
 
-fprintf('\nAverage Sampling Rate: %2.2f Hz\n', rate_avg)
-
-%% Part E
-
-% plot Monkey J's ending position for every trial
-% 
-% for i = 1:n_trials
-%     R(1).cursorPos(1:2,end)
-% end
+%% Part E: 2D Representation
 
 figure(2)
 hold on
@@ -79,15 +76,17 @@ hold off
 
 title('Part E: 2D Representation of Monkey J Hand Position')
 xlabel('X-Position (mm)')
-xlabel('Y-Position (mm)')
+ylabel('Y-Position (mm)')
 
-% do not see refractory period because multiple neurons firing
+% This 2D representation is what we would expect from the experiments. We
+% see Monkey J's hand moving back and forth from the center target (0,0) to
+% each of the eight targets in a star formation.
 
 %% Part F
 
 n_electrodes = size(full(R(1).spikeRaster),1);
 
-fprintf('\nNumber of Electrodes: %d \n', n_electrodes)
+fprintf('\nNumber of Electrode Channels: %d \n', n_electrodes)
 
 %% Part G
 
@@ -107,7 +106,7 @@ for i = 1:n_trials
     end
 end
 
-figure
+figure(3)
 plotRaster(raster_cell)
 ylabel('Trial #')
 title('Part G: Spike Trains for Right Target')
@@ -121,11 +120,18 @@ for i = 1:length(raster_cell)
 end
 
 bins = 0:10:max(ISI_dist);
+
+figure(4)
 ISI_hist = histcounts(ISI_dist,bins,'Normalization','pdf');
 bar(bins(1:end-1), ISI_hist, 'histc')
 title('Part H: ISI Distribution')
 xlabel('ISI Length (ms)')
 ylabel('Probability')
+
+% The data is not spike sorted. We cannot see the refractory periods which
+% should be present if each electrode was recording only one neuron.
+% Instead, we see a superposition of several neurons on each electrode and
+% no distinct refractory period in the ISI distribution.
 
 %% Part I
 
@@ -224,17 +230,19 @@ for i = 1:n_targets
     % iter(i) is the number of trials for each direction
 end
 
-
-figure(3)
+figure(5)
 t_plot = 25:dt:500;
 % time axis
-plot(t_plot, spike_avg_smooth{1}, t_plot, spike_avg_smooth{2}, t_plot, spike_avg_smooth{3},...
-    t_plot, spike_avg_smooth{4}, t_plot, spike_avg_smooth{6}, t_plot, spike_avg_smooth{7},...
-    t_plot, spike_avg_smooth{8}, t_plot, spike_avg_smooth{9})
-axis([25 500 0 3.5])
+% convert y axis to firing rate (from # spikes per bin)
+plot(t_plot, spike_avg_smooth{1}*1000/25, t_plot, spike_avg_smooth{2}*1000/25, ...
+    t_plot, spike_avg_smooth{3}*1000/25,...
+    t_plot, spike_avg_smooth{4}*1000/25, t_plot, spike_avg_smooth{6}*1000/25, ...
+    t_plot, spike_avg_smooth{7}*1000/25,...
+    t_plot, spike_avg_smooth{8}*1000/25, t_plot, spike_avg_smooth{9}*1000/25)
+axis([25 500 0 120])
 title('Part I: PSTHs for Eight Reach Directions')
 xlabel('Time (ms)')
-ylabel('Number of Spikes Per Bin')
+ylabel('Average Firing Rate (Hz)')
 
 % tells you avg firing rate for electrode when reaching to target
 % plotting lambda(t) for poisson process -- avg firing rate through time

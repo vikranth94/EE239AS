@@ -1,5 +1,9 @@
 %% EE239AS HW #6
 
+% Collaborators: Vikranth, Yusi
+clc
+clear
+close all
 %% Problem 4
 
 load('/Users/Yusi/Documents/EE239AS/HW6/JR_2015-12-04_truncated2.mat');
@@ -21,13 +25,13 @@ A = [1 0 dt 0 0;
     0 1 0 dt 0;
     0 0 v_xx v_xy 0;
     0 0 v_yx v_yy 0;
-    0 0 0 0 0];
+    0 0 0 0 1];
 
 % extra column and row of zeros accounts for the bias term 
 
-fprintf('Kalman Filter A Matrix: \n')
+fprintf('\nPart A -- Kalman Filter A Matrix: \n')
 disp(A)
-%% Part B: Hand Velocities (Covariance)
+%% Part B: A Matrix
 
 X = [R(1:400).cursorPos];
 sample_ind = 1:25:length(X);
@@ -40,8 +44,10 @@ X_k = [X_bin; ones(1, size(X_bin,2))];
 
 A_s = X_k(:,2:end)*pinv(X_k(:,1:end-1));
 % use ML to estimate v_xx, v_yy, v_yx, v_xy
+A(3:4,3:4) = A_s(1:2, 1:2);
 
-A(3:5,3:5) = A_s;
+fprintf('\nPart B -- Kalman Filter A Matrix: \n')
+disp(A)
 
 %% Part C: C Matrix
 
@@ -56,29 +62,37 @@ C = zeros(n_electrodes, 5);
 C_s = Y_k * pinv(X_k);
 
 C(:,end-2:end) = C_s;
-C_s_sum = sum(C,1);
+C_sum = sum(C,1);
 
-fprintf('Sum of C Across Electrodes:\n')
-disp(C_s_sum)
+fprintf('\nPart C -- Sum of C Across Electrodes:\n')
+disp(C_sum)
 
 %% Part D: W Matrix
 
 W_s = 1/(size(X_k,2)-1)*(X_k(:,2:end) - A_s*X_k(:,1:end-1))*(X_k(:,2:end)-A_s*X_k(:,1:end-1))';
 W = zeros(size(A));
-W(3:5,3:5) = W_s;
+W(3:4,3:4) = W_s(1:2,1:2);
+
+fprintf('\nPart D -- Kalman Filter W Matrix: \n')
+disp(W)
 
 %% Part E: Q Matrix
 
 Q = 1/size(X_k,2)*(Y_k-C_s*X_k)*(Y_k-C_s*X_k)';
-% why not using C?
 
-figure
+figure(1)
 imagesc(Q)
+title('Part E: Q Matrix Visualization')
+xlabel('Electrode Number')
+ylabel('Electrode Number')
+
+% tells you how well y_k approximates Cx_k
+% diagonal is for each electrode
+% off diagonals are co-varied in residuals 
+% dark neurons are close to 0 firing rate, and C is close to 0 
 
 %% Part F: Steady State Kalman Filter
 
-% sigma_prev = zeros(3,3);
-% sigma_pres = [];
 S = zeros(size(W));
 
 tol = 10^-13;
@@ -88,16 +102,17 @@ M_2_prev = 0;
 iter = 0;
 
 while any(abs(iterativeDiff)>tol)
-%     sigma_pres = A*sigma_prev*A' + W;
     iter = iter+1;
     S = A*S*A' + W;
-    %K_k = sigma_pres*C'*inv(C*sigma_pres*C' + Q);
-    K_k = S*C'*inv(C*S*C' + Q);
-    
-    %sigma_prev = sigma_pres - sigma_pres*C'*inv(C*sigma_pres*C' + Q)*C*sigma_pres;
-    S = S - S*C'*inv(C*S*C' + Q)*C*S;
+    % introduce uncertainty
     S(1:2,:) = 0;
     S(:, 1:2) = 0;
+    % zero out uncertainty so it does not propagate
+    % calculate S (k_k-1) using previous S (k-1_k-1) value
+    K_k = S*C'*inv(C*S*C' + Q);
+    % calculate Kalman gain from updated S value
+    S = S - S*C'*inv(C*S*C' + Q)*C*S;
+    % calculate S (k_k) using previous S (k_k-1) value
     
     M_1 = A-K_k*C*A;
     M_2 = K_k;
@@ -108,10 +123,10 @@ while any(abs(iterativeDiff)>tol)
     M_2_prev = M_2;
 end
 
-fprintf('\nKalman Filter M_1 Matrix:\n')
+fprintf('\nPart F -- Kalman Filter M_1 Matrix:\n')
 disp(M_1)
 
-fprintf('\nKalman Gain (All Electrodes):\n')
+fprintf('\nPart F -- Kalman Gain (All Electrodes):\n')
 disp(sum(M_2,2))
 
 %% Part G: Kalman Filter Decoding
@@ -139,24 +154,26 @@ for i = 1:106
     
 end
 
-figure
+X_true = [R(401:end).cursorPos];
+
+figure(2)
+scatter(X_true(1,:), X_true(2,:))
+title('Part G: True Hand Positions')
+xlabel('X-Position (mm)')
+ylabel('Y-Position (mm)')
+
+figure(3)
 hold on
 for i = 1:106
     scatter(X_decode{i}(1,:), X_decode{i}(2,:))
 end
-
 hold off
+
 title('Part G: Kalman Filter Decoded Hand Positions')
+xlabel('X-Position (mm)')
+ylabel('Y-Position (mm)')
 
-%%
-
-X_true = [R(401:end).cursorPos];
-
-figure
-scatter(X_true(1,:), X_true(2,:))
-title('Part G: True Hand Positions')
-
-%% Part C: Mean-Square Error
+% Part G(b): Mean-Square Error
 
 errors = cell(1,106);
 mean_errors = zeros(2,106);
@@ -168,8 +185,6 @@ for i = 1:106
     errors{i} = (pos_vec - X_decode{i}(1:2,:)).^2;
     mean_errors(:,i) = mean(errors{i},2);
 end
-
 mean_error_all = sum(mean(mean_errors,2));
 
 fprintf('\nKalman Filter Mean Square Error: %4.2f\n', mean_error_all)
-

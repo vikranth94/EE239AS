@@ -1,5 +1,10 @@
 %% EE239AS HW #6
 
+% Collaborators: Vikranth, Yusi
+clc
+clear
+close all
+
 %% Problem 3
 
 load('/Users/Yusi/Documents/EE239AS/HW6/JR_2015-12-04_truncated2.mat');
@@ -9,6 +14,7 @@ load('/Users/Yusi/Documents/EE239AS/HW6/JR_2015-12-04_truncated2.mat');
 n_trials = length(R);
 n_electrodes = 96;
 dt = 25;
+
 %% Part A: Y Matrix
 
 Y = [R(1:400).spikeRaster];
@@ -18,7 +24,7 @@ Y_bin = binFunc(Y_reach_raster, dt);
 Y_bin = Y_bin(:, 1:end-1);
 % get rid of the last bin which does not have 25 ms worth of data
 
-hist_bins = 3;
+hist_bins = 4;
 Y_W = [];
 
 for i = 0:hist_bins-1
@@ -45,7 +51,7 @@ X_W = X_bin(:,hist_bins+1:end);
 
 L_W = X_W*pinv(Y_W);
 
-%% Decoding Using Weiner Filter 
+% Decoding Using Weiner Filter 
 
 X_decode = cell(1, 106);
 start_pos = zeros(2, 106);
@@ -61,7 +67,6 @@ Y_init = [];
 for i = 0:hist_bins-1
     Y_init = [Y_init; Y_prev_bin(:,(end-hist_bins+1-i):(end-i))];
 end
-% Y_init = Y_prev_bin(:,end-hist_bins+1:end);
 
 % stack the sliding window of Y_bins
 % have 5 because considering present bin and 100 ms (4 bins) worth of
@@ -103,13 +108,16 @@ for i = 1:106
     
 end
 
-figure
+figure(1)
 hold on
 for i = 1:106
     scatter(X_test_pos{i}(1,:), X_test_pos{i}(2,:))
 end
-
 hold off
+title('Part B: Weiner Filter Decoded Positions')
+xlabel('X-Position (mm)')
+ylabel('Y-Position (mm)')
+
 
 %% Part C: Mean-Square Error
 
@@ -127,3 +135,7 @@ end
 mean_error_all = sum(mean(mean_errors,2));
 
 fprintf('\nWeiner Filter Mean Square Error: %4.2f\n', mean_error_all)
+
+% The Weiner filter performs better than the optimal linear estimator. In
+% the optimal linear estimator decodes only using the present value of the
+% firing rate. The Weiner filter uses history to improve this decoding.

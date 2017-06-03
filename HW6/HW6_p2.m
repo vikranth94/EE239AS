@@ -1,5 +1,9 @@
 %% EE239AS HW #6
 
+% Collaborators: Vikranth, Yusi
+clc
+clear all
+close all
 %% Problem 2
 
 load('/Users/Yusi/Documents/EE239AS/HW6/JR_2015-12-04_truncated2.mat');
@@ -109,19 +113,8 @@ for i = 1:n_targets
     % taking the average across all trials for each bin 
     % iter(i) is the number of trials for each direction
 end
-%%
-figure
-t_plot = 25:dt:500;
-% time axis
-plot(t_plot, spike_avg{1}, t_plot, spike_avg{2}, t_plot, spike_avg{3},...
-    t_plot, spike_avg{4}, t_plot, spike_avg{6}, t_plot, spike_avg{7},...
-    t_plot, spike_avg{8}, t_plot, spike_avg{9})
-axis([25 500 0 3.5])
-title('Part A: PSTHs for Eight Reach Directions')
-xlabel('Time (ms)')
-ylabel('Number of Spikes Per Bin')
 
-%% Part A
+%% Part A: Tuning Curve Fit
 
 % averaging firing rates from 250 to 500 ms for each reach direction
 % starting at index 10 until end of vector
@@ -140,6 +133,7 @@ theta = [180 225 135 270 90 315 45 0];
 y = [mean_rates(1:4) mean_rates(6:end)];
 % take out the center 0, 0 target 
 
+figure(1)
 [c0, c1, theta0] = tcFit(theta, y, 1);
 fprintf('Tuning Curve Parameters for Part A: \n c0 = %2.2f, c1 = %2.2f, theta0 = %2.2f\n', ...
     c0, c1, theta0)
@@ -175,8 +169,6 @@ for i = 1:n_electrodes
     [c0_all(i), c1_all(i), theta0_all(i)] = tcFit(theta, y_all(i,:), 0);
 end
 
-%%
-
 [sorted_c1,sorted_ind] = sort(abs(c1_all),'descend');
 top_c1_ind = sorted_ind(1:30);
 for i = 1:length(top_c1_ind)
@@ -189,24 +181,14 @@ for i = 1:length(top_c1_ind)
     end
 end
 
-% theta_top = theta0_all(top_c1_ind);
-% c1_top = c1_all(top_c1_ind);
-
-figure
+figure(2)
 h = polar(theta_top*pi/180,c1_top,'o');
 set(h,'markersize',5)
-
-
-% hold on
-% 
-% for i = 1:length(c1_top)
-%     polar([0 theta_top(i)], [0 c1_top(i)]);
-% end
-
 title('Part B: Preferred Reaching Directions for Greatest Modulation Depth Electrodes')
-% hold off
 
-% This spans the reaching space well
+% This does not span the reaching space well; there is a 60 degree gap in
+% the bottom right (270-330 degrees) where there is no preferred reaching
+% direction represented by the top 30 modulation depth electrodes.
 
 %% Part C: Optimal Linear Estimator (Velocity)
 
@@ -218,12 +200,6 @@ Y_bin = Y_bin(:, 1:end-1);
 % get rid of the last bin which does not have 25 ms worth of data
 Y_bin = [Y_bin; ones(1, size(Y_bin, 2))];
 
-% Y_target = zeros(400,2);
-% 
-% for i = 1:400
-%     Y_target(i,:) = R(i).target(1:2)';
-% end
-
 X = [R(1:400).cursorPos];
 sample_ind = 1:25:length(X);
 
@@ -231,22 +207,34 @@ pos_bin = X(1:2,sample_ind);
 
 X_bin = diff(pos_bin,1,2)/0.025;
 
+fprintf('\nY_bin Size:')
+disp(size(Y_bin))
+
+fprintf('\nX_bin Size:')
+disp(size(X_bin))
+
+% The dimensions of X_bin and Y_bin make sense, because they are the
+% concatenated bins for all 400 training trials for all 96 neurons. We are
+% also deleting the last bin from each trial if it does not have 25 ms worth 
+% of data.
+
 %% Part D: Optimal Linear Estimator (Parameters)
 
 L = X_bin * pinv(Y_bin);
 L_top = L(:,top_c1_ind);
 
-figure
-% plot(L_top(1,:),L_top(2,:),'o','markersize',5)
+figure(3)
 [L_theta, L_rho] = cart2pol(L_top(1,:),L_top(2,:));
 
 h = polar(L_theta,L_rho,'o');
-% h = polar(L_top(1,:),L_top(2,:),'*');
 set(h,'markersize',5)
 hold on
-
 title('Part D: L Parameters')
 hold off
+
+% The plot does not look similar to the plot in Part C, as it covers the
+% reaching space better. The OLE fits the data, and therefore it doesn't
+% have the gap at the bottom right reaching angles.
 
 %% Part E: Optimal Linear Estimator (Decoding)
 X_decode = cell(1, 106);
@@ -269,13 +257,23 @@ for i = 1:106
     % 2 x time point x trial
 end
 
-figure
+figure(4)
 hold on
 for i = 1:106
     scatter(X_test_pos{i}(1,:), X_test_pos{i}(2,:))
 end
 
 hold off
+title('Part D: Optimal Linear Estimator Decoder')
+xlabel('X-Position (mm)')
+ylabel('Y-Position (mm)')
+
+% There are idiosyncracies in the decoding. For example, when the monkey
+% reaches from the center target to the left target vs. right target to
+% center target, the positions and velocities are similar. However, the
+% neural data is not the same for these two movements. The OLE cannot
+% differentiate between the two because it only takes into account the 
+% preferred direction.
 
 %% Part F: Mean-Square Error
 
