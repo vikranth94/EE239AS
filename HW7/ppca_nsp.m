@@ -32,8 +32,7 @@ function [LL, W, s2] = ppca_nsp(X, D)
     LL_prev     = -Inf;
 
     % do a maximum of cyc cycles
-    for i = 1:1
-        disp(i)
+    for i = 1:cyc
         % ===============================
         % E-STEP -- compute E[s], E[ss^T]
         % ===============================
@@ -68,15 +67,9 @@ function [LL, W, s2] = ppca_nsp(X, D)
         %%%%% START YOUR CODE HERE TO CALCULATE W and s2 %%%%%
 
         
-       % W = (X-mu_mat)*Es'*(1/K)*inv(Es*Es')
-       W = (X-mu_mat)*pinv(Es)
-%         (X-mu_mat)*Es'
-%         Es'
-%         Es*Es'
-%         inv(Es*Es')
-        
-        
-        s2 = 1/(N*K) * trace((X-mu_mat)*(X-mu_mat)' - W*Es*(X-mu_mat)')
+        W = (X-mu_mat)*Es'*(1/K)*inv(Ess');
+      % W = (X-mu_mat)*pinv(Es)/K;
+        s2 = 1/(N*K) * trace((X-mu_mat)*(X-mu_mat)' - W*Es*(X-mu_mat)');
         
         %%%%% END YOUR CODE HERE TO CALCULATE W and s2 %%%%%
 

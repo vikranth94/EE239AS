@@ -25,3 +25,5 @@ dim_reduce_plot(Y0',Xsim_hat,u1)
 
 D = 1;      % low dimension
 [LL, W, s2] = ppca_nsp(Y, D);
+figure(2);
+plot(LL);
