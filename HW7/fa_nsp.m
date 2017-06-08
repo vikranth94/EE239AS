@@ -25,7 +25,7 @@ function [LL, W, psi] = fa_nsp(X, D)
     % Initialization ofparameters
     cX  = cov(X', 1);
     W   = randn(N,D);
-    psi  = mean(diag(cX));       % noise variance
+    psi  = diag(diag(cX));       % noise variance
     mu  = mean(X, 2);
     LL  = [];
 
@@ -43,9 +43,8 @@ function [LL, W, psi] = fa_nsp(X, D)
         %%%%% START YOUR CODE HERE TO CALCULATE Es and Ess %%%%%
         mu_mat = repmat(mu,1,K);
         % identity matrix needs to be N x N to match dimensions of W*W'
-
-        Es = W'*inv(W*W' + psi*eye(N))*(X-mu_mat);
-        Ess = eye(D) - W'*inv(W*W' + psi*eye(N))*W + (1/K)*Es*Es';
+        Es = W'*inv(W*W' + psi)*(X-mu_mat);
+        Ess = eye(D) - W'*inv(W*W' + psi)*W + (1/K)*Es*Es';
         % Ess = cov(s_k) + Es * Es'
 
         %%%%% END YOUR CODE HERE TO CALCULATE Es and Ess %%%%%
@@ -55,7 +54,7 @@ function [LL, W, psi] = fa_nsp(X, D)
         % ======================
 
         % We'll do this one for you.
-        Sx      = W*W' + psi * eye(N);
+        Sx      = W*W' + psi;
         Xm      = bsxfun(@minus, X, mu);
         LLi     = -N*K/2*log(2*pi) - K/2*log(det(Sx))-1/2*trace(Xm' * inv(Sx) * Xm);
         LL      = [LL LLi];
@@ -67,8 +66,7 @@ function [LL, W, psi] = fa_nsp(X, D)
         %%%%% START YOUR CODE HERE TO CALCULATE W and s2 %%%%%
 
         W = (X-mu_mat)*Es'*(1/K)*inv(Ess');
-        psi = 1/(N*K) * trace((X-mu_mat)*(X-mu_mat)' - W*Es*(X-mu_mat)');
-        
+        psi = 1/(K) * diag(diag((X-mu_mat)*(X-mu_mat)' - W*Es*(X-mu_mat)'));
         %%%%% END YOUR CODE HERE TO CALCULATE W and s2 %%%%%
 
         % =====================

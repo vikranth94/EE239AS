@@ -57,12 +57,15 @@ Es = W'*inv(W*W' + s2*eye(N))*(Y-mu_mat);
 
 figure(3)
 dim_reduce_plot(Xsim,Es',W)
+title('PPCA Visualization')
+xlabel('Dimension 1')
+ylabel('Dimension 2')
         
 %% Part E: FA EM Algorithm
 
 D = 1;      % low dimensional space
 [LL_FA, W_FA, psi] = fa_nsp(Y, D);
-figure(3);
+figure(4);
 plot(LL_FA)
 title('Part D: Log Data Likehood (FA)')
 xlabel('Iteration')
@@ -78,8 +81,21 @@ cov_sample  = cov(Xsim, 1);
 fprintf('\nSample Covariance:\n')
 disp(cov_sample)
 
-cov_PPCA = (W*W' + psi);
+cov_FA = (W_FA*W_FA' + psi);
 fprintf('\nFA Covariance:\n')
-disp(cov_PPCA)
+disp(cov_FA)
 
-% The sample covariance and PPCA covariance are very similar.
+% The sample covariance and FA covariance are very similar.
+
+%% Part G: FA Visualization
+
+mu = mean(Y, 2);
+mu_mat = repmat(mu,1,K);
+
+Es_FA = W_FA'*inv(W_FA*W_FA' + psi)*(Y-mu_mat);
+
+figure(5)
+dim_reduce_plot(Xsim,Es_FA',W_FA)
+title('FA Visualization')
+xlabel('Dimension 1')
+ylabel('Dimension 2')
