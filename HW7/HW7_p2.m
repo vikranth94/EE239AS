@@ -19,7 +19,7 @@ S = (1/size(Y0,2))*(Y0*Y0');
 Xsim_hat = Y0'*u1;
 
 figure(1)
-dim_reduce_plot(Y0',Xsim_hat,u1)
+dim_reduce_plot(Xsim,Xsim_hat,u1)
 title('PCA Visualization')
 xlabel('Dimension 1')
 ylabel('Dimension 2')
