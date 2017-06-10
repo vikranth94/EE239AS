@@ -63,5 +63,5 @@ figure(3)
 imagesc(U_D')
 colorbar
 title('Part A: Top Three Eigenvectors')
-xlabel('Neuron')
+xlabel('Electrode')
 ylabel('Principle Component')
